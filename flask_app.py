@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from config_loader import cargar_configuracion
 import pandas as pd
+import requests
 
 app = Flask(__name__)
 
@@ -19,7 +20,7 @@ def compras():
     config = cargar_configuracion()
     url_proveedores = config.get('URLProveedores', '')
     url_productos = config.get('URLProductos', '')
-    url_compras = config.get('URLCompras', '')
+    url_script = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
 
     if request.method == 'POST':
         datos = {
@@ -35,11 +36,11 @@ def compras():
             'Observaciones': request.form['Observaciones']
         }
 
-        df = pd.DataFrame([datos])
         try:
-            df.to_csv(url_compras, mode='a', index=False, header=False)
+            respuesta = requests.post(url_script, json=datos)
+            print("📥 Respuesta del script:", respuesta.text)
         except Exception as e:
-            print("❌ Error al guardar:", e)
+            print("❌ Error al enviar datos:", e)
 
         return redirect('/compras')
 
@@ -64,3 +65,4 @@ def compras():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
