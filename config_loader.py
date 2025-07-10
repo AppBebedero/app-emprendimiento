@@ -1,7 +1,7 @@
 import pandas as pd
 
 def cargar_configuracion():
-    url_csv = 'https://docs.google.com/spreadsheets/d/e/tu_url_de_csv/pub?gid=0&single=true&output=csv'
+    url_csv = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl81yJ7lo37cETniOOSzLkqwwTB6jeViKi9ebN9GweztKSL8QQ7l05pqm8LwMGMOMR0m5QCCZtOrQL/pub?gid=0&single=true&output=csv'
     df = pd.read_csv(url_csv)
     config = {}
 
@@ -11,3 +11,4 @@ def cargar_configuracion():
         config[clave] = valor
 
     return config
+
