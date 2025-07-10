@@ -1,26 +1,26 @@
 from flask import Flask, render_template, request, redirect
 from config_loader import cargar_configuracion
 import pandas as pd
-import datetime
 
 app = Flask(__name__)
-config = cargar_configuracion()
-
-# --- URLs de datos ---
-url_proveedores = config.get('URLProveedores', '')
-url_productos = config.get('URLProductos', '')
-url_compras = config.get('URLCompras', '')
 
 @app.route('/')
 def inicio():
+    config = cargar_configuracion()
     return render_template('inicio.html', config=config)
 
 @app.route('/configuracion')
 def configuracion():
+    config = cargar_configuracion()
     return render_template('configuracion.html', config=config)
 
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
+    config = cargar_configuracion()
+    url_proveedores = config.get('URLProveedores', '')
+    url_productos = config.get('URLProductos', '')
+    url_compras = config.get('URLCompras', '')
+
     if request.method == 'POST':
         datos = {
             'Fecha': request.form['Fecha'],
@@ -49,14 +49,14 @@ def compras():
     try:
         df_prov = pd.read_csv(url_proveedores)
         proveedores = df_prov.iloc[:, 0].dropna().tolist()
-    except:
-        pass
+    except Exception as e:
+        print("⚠️ Error cargando proveedores:", e)
 
     try:
         df_prod = pd.read_csv(url_productos)
         productos = df_prod.iloc[:, 0].dropna().tolist()
-    except:
-        pass
+    except Exception as e:
+        print("⚠️ Error cargando productos:", e)
 
     return render_template('compras.html', config=config,
                            proveedores=proveedores,
