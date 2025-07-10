@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">⚙️ Configuración actual</h2>
+  <ul class="list-group">
+    {% for clave, valor in config.items() %}
+      <li class="list-group-item">
+        <strong>{{ clave }}:</strong> {{ valor }}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
