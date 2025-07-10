@@ -15,6 +15,7 @@
     <div class="mb-3">
       <label class="form-label">Proveedor:</label>
       <select class="form-select" name="Proveedor" required>
+        <option value="" disabled selected>Seleccione un proveedor</option>
         {% for proveedor in proveedores %}
           <option value="{{ proveedor }}">{{ proveedor }}</option>
         {% endfor %}
@@ -23,6 +24,7 @@
     <div class="mb-3">
       <label class="form-label">Producto:</label>
       <select class="form-select" name="Producto" required>
+        <option value="" disabled selected>Seleccione un producto</option>
         {% for producto in productos %}
           <option value="{{ producto }}">{{ producto }}</option>
         {% endfor %}
@@ -56,3 +58,4 @@
   </form>
 </div>
 {% endblock %}
+
