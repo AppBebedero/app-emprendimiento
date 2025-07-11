@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Registrar Producto{% endblock %}
+{% block topbar_title %}Registrar Producto{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+  <div class="card shadow p-4">
+    <h3 class="mb-4 text-center">📦 Nuevo Producto</h3>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Nombre del producto:</label>
+        <input type="text" name="Nombre" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Categoría:</label>
+        <input type="text" name="Categoría" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Unidad de medida:</label>
+        <select name="Unidad" class="form-select">
+          <option value="">Seleccione una unidad</option>
+          <option value="Unidad">Unidad</option>
+          <option value="Litro">Litro</option>
+          <option value="Metro">Metro</option>
+          <option value="Caja">Caja</option>
+          <option value="Bolsa">Bolsa</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Proveedor:</label>
+        <select name="Proveedor" class="form-select" required>
+          <option value="">Seleccione un proveedor</option>
+          {% for proveedor in proveedores %}
+            <option value="{{ proveedor }}">{{ proveedor }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones:</label>
+        <textarea name="Observaciones" class="form-control" rows="2"></textarea>
+      </div>
+      <div class="text-end mt-4">
+        <a href="/" class="btn btn-danger me-2">Cancelar</a>
+        <button type="submit" class="btn btn-success">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
