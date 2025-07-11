@@ -15,11 +15,12 @@
       font-family: Arial, sans-serif;
       padding-top: 60px;
       padding-bottom: 60px;
+      overflow-x: hidden;
     }
 
     /* Encabezado (barra superior) */
     .topbar {
-      background-color: #A347E4; /* Morado más intenso */
+      background-color: #A347E4; /* Morado */
       color: white;
       padding: 10px 20px;
       position: fixed;
@@ -44,7 +45,7 @@
       overflow-x: hidden;
       transition: 0.3s;
       padding-top: 60px;
-      z-index: 999;
+      z-index: 1100;
     }
 
     .sidebar a {
@@ -65,9 +66,13 @@
       padding: 20px;
     }
 
+    .main-content.shifted {
+      margin-left: 0; /* No desplazamos al abrir menú */
+    }
+
     /* Pie de página (barra inferior) */
     .bottombar {
-      background-color: #A347E4; /* Morado más intenso */
+      background-color: #A347E4; /* Morado */
       color: white;
       position: fixed;
       bottom: 0;
@@ -80,10 +85,6 @@
     /* Mostrar menú cuando está abierto */
     .sidebar.open {
       left: 0;
-    }
-
-    .main-content.shifted {
-      margin-left: 250px;
     }
   </style>
 </head>
@@ -125,11 +126,10 @@
   <script>
     function toggleMenu() {
       const sidebar = document.getElementById("sidebar");
-      const main = document.getElementById("main");
       sidebar.classList.toggle("open");
-      main.classList.toggle("shifted");
     }
   </script>
 
 </body>
 </html>
+
