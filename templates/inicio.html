@@ -3,9 +3,16 @@
 {% block topbar_title %}Party Box{% endblock %}
 
 {% block content %}
-<div style="text-align: center; padding: 10px;">
-  <img src="{{ url_for('static', filename='Inicio.png') }}"
-       alt="Bienvenida Party Box"
-       style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" />
-</div>
+<style>
+  .pantalla-inicio {
+    background-image: url('{{ url_for('static', filename='Inicio.png') }}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100vw;
+    height: calc(100vh - 120px); /* Resta topbar y bottombar */
+  }
+</style>
+
+<div class="pantalla-inicio"></div>
 {% endblock %}
