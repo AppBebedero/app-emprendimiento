@@ -1,25 +1,91 @@
 {% extends "base.html" %}
 {% block title %}Registrar Compra{% endblock %}
 {% block content %}
-<div class="container mt-4 mb-5">
+<style>
+  .formulario {
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  .formulario label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .formulario input,
+  .formulario select,
+  .formulario textarea {
+    width: 100%;
+    padding: 6px;
+    margin-bottom: 15px;
+    text-align: right;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .fila-doble {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .fila-doble > div {
+    flex: 1 1 45%;
+  }
+
+  .botones {
+    text-align: center;
+    margin-top: 25px;
+  }
+
+  .btn-cancelar {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-right: 15px;
+    text-decoration: none;
+  }
+
+  .btn-guardar {
+    background-color: #198754;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+  }
+
+  .btn-cancelar:hover,
+  .btn-guardar:hover {
+    opacity: 0.9;
+    cursor: pointer;
+  }
+</style>
+
+<div class="formulario">
   <h2 style="text-align: center; margin-bottom: 20px;">🧾 Registrar Compra</h2>
 
   <form method="POST">
-    <div class="row g-3">
-
-      <div class="col-md-6">
-        <label class="form-label">Fecha:</label>
-        <input type="date" name="Fecha" class="form-control text-end" required>
+    <div class="fila-doble">
+      <div>
+        <label>Fecha:</label>
+        <input type="date" name="Fecha" required>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label">N° Documento:</label>
-        <input type="text" name="N_Documento" class="form-control text-end" required>
+      <div>
+        <label>N° Documento:</label>
+        <input type="text" name="N_Documento" required>
       </div>
+    </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Proveedor:</label>
-        <select name="Proveedor" class="form-control text-end" required>
+    <div class="fila-doble">
+      <div>
+        <label>Proveedor:</label>
+        <select name="Proveedor" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
             <option value="{{ p }}">{{ p }}</option>
@@ -27,29 +93,33 @@
         </select>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Producto:</label>
-        <select name="Producto" class="form-control text-end" required>
+      <div>
+        <label>Producto:</label>
+        <select name="Producto" required>
           <option value="">Seleccione...</option>
           {% for p in productos %}
             <option value="{{ p }}">{{ p }}</option>
           {% endfor %}
         </select>
       </div>
+    </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Cantidad:</label>
-        <input type="number" name="Cantidad" step="any" class="form-control text-end" required>
+    <div class="fila-doble">
+      <div>
+        <label>Cantidad:</label>
+        <input type="number" name="Cantidad" step="any" required>
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Precio Unitario:</label>
-        <input type="number" name="PrecioUnitario" step="any" class="form-control text-end" required>
+      <div>
+        <label>Precio Unitario:</label>
+        <input type="number" name="PrecioUnitario" step="any" required>
       </div>
+    </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Moneda:</label>
-        <select name="Moneda" class="form-control text-end" required>
+    <div class="fila-doble">
+      <div>
+        <label>Moneda:</label>
+        <select name="Moneda" required>
           <option value="">Seleccione...</option>
           <option value="₡">₡</option>
           <option value="$">$</option>
@@ -57,30 +127,30 @@
         </select>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Forma de Pago:</label>
-        <select name="Forma_Pago" class="form-control text-end" required>
+      <div>
+        <label>Forma de Pago:</label>
+        <select name="Forma_Pago" required>
           <option value="">Seleccione...</option>
           <option value="Efectivo">Efectivo</option>
           <option value="SINPE">SINPE</option>
           <option value="Tarjeta Cr.">Tarjeta Cr.</option>
         </select>
       </div>
+    </div>
 
-      <div class="col-md-12">
-        <label class="form-label">Observaciones:</label>
-        <textarea name="Observaciones" rows="2" class="form-control text-end"></textarea>
-      </div>
+    <div>
+      <label>Observaciones:</label>
+      <textarea name="Observaciones" rows="2"></textarea>
+    </div>
 
-      <div class="col-md-12 text-center mt-4">
-        <a href="/" class="btn btn-danger me-3">Cancelar</a>
-        <button type="submit" class="btn btn-success">Guardar</button>
-      </div>
-
+    <div class="botones">
+      <a href="/" class="btn-cancelar">Cancelar</a>
+      <button type="submit" class="btn-guardar">Guardar</button>
     </div>
   </form>
 </div>
 {% endblock %}
+
 
 
 
