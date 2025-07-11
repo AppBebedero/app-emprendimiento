@@ -67,19 +67,27 @@
     }
 
     .main-content.shifted {
-      margin-left: 0; /* No desplazamos al abrir menú */
+      margin-left: 0; /* No desplazar contenido al abrir menú */
     }
 
-    /* Pie de página (barra inferior) */
+    /* Barra inferior fija con botones */
     .bottombar {
       background-color: #A347E4; /* Morado */
       color: white;
       position: fixed;
       bottom: 0;
       width: 100%;
-      text-align: center;
-      padding: 8px;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
       z-index: 1000;
+    }
+
+    .bottombar a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      text-align: center;
     }
 
     /* Mostrar menú cuando está abierto */
@@ -117,9 +125,10 @@
     {% block content %}{% endblock %}
   </div>
 
-  <!-- Barra inferior -->
+  <!-- Barra inferior con botones -->
   <div class="bottombar">
-    &copy; 2025 App Emprendimiento | José Daniel Quesada
+    <a href="/"><i class="bi bi-house-door-fill"></i><br>Inicio</a>
+    <a href="/reportes"><i class="bi bi-bar-chart-fill"></i><br>Reportes</a>
   </div>
 
   <!-- Script para abrir/cerrar menú -->
@@ -132,4 +141,3 @@
 
 </body>
 </html>
-
