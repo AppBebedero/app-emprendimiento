@@ -10,13 +10,15 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  .inicio-transparente {
-    height: calc(100vh - 120px); /* visible sin topbar y bottombar */
+  .inicio-fondo-completo {
+    height: 100vh;
     width: 100%;
   }
 </style>
 
-<div class="inicio-transparente"></div>
+<div class="inicio-fondo-completo"></div>
 {% endblock %}
