@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Registrar Proveedor{% endblock %}
+{% block topbar_title %}Registrar Proveedor{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+  <div class="card shadow p-4">
+    <h3 class="mb-4 text-center">📋 Nuevo Proveedor</h3>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Nombre:</label>
+        <input type="text" name="Nombre" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Teléfono:</label>
+        <input type="text" name="Telefono" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email:</label>
+        <input type="email" name="Email" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contacto:</label>
+        <input type="text" name="Contacto" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Celular:</label>
+        <input type="text" name="Celular" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tipo de Negocio:</label>
+        <select name="Tipo" class="form-select" required>
+          <option value="">Seleccione una opción</option>
+          <option value="Librería">Librería</option>
+          <option value="Suministros">Suministros</option>
+          <option value="Servicios">Servicios</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones:</label>
+        <textarea name="Observaciones" class="form-control" rows="2"></textarea>
+      </div>
+      <div class="text-end mt-4">
+        <a href="/" class="btn btn-danger me-2">Cancelar</a>
+        <button type="submit" class="btn btn-success">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
