@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect
 from config_loader import cargar_configuracion
 import pandas as pd
 import requests
+from apscheduler.schedulers.background import BackgroundScheduler
+import os
 
 app = Flask(__name__)
 
@@ -63,6 +65,20 @@ def compras():
                            proveedores=proveedores,
                            productos=productos)
 
+# --- 🔁 Auto-ping para mantener la app activa ---
+def hacer_ping():
+    url = "https://app-emprendimiento.onrender.com/"
+    try:
+        respuesta = requests.get(url)
+        print(f"🔄 Auto-ping enviado: {respuesta.status_code}")
+    except Exception as e:
+        print("❌ Error en auto-ping:", e)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(hacer_ping, 'interval', minutes=14)
+scheduler.start()
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
