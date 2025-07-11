@@ -4,15 +4,19 @@
 
 {% block content %}
 <style>
-  .pantalla-inicio {
+  body {
     background-image: url('{{ url_for('static', filename='Inicio.png') }}');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    width: 100vw;
-    height: calc(100vh - 120px); /* Resta topbar y bottombar */
+    background-attachment: fixed;
+  }
+
+  .inicio-transparente {
+    height: calc(100vh - 120px); /* visible sin topbar y bottombar */
+    width: 100%;
   }
 </style>
 
-<div class="pantalla-inicio"></div>
+<div class="inicio-transparente"></div>
 {% endblock %}
