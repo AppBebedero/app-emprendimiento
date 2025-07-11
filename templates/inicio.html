@@ -1,19 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Inicio{% endblock %}
-
-{% block topbar_title %}Party Box - ¡Diversión para tus eventos!{% endblock %}
+{% block title %}Inicio - Party Box{% endblock %}
+{% block topbar_title %}Party Box{% endblock %}
 
 {% block content %}
-<div style="text-align: center;">
-  <!-- Encabezado grande -->
-  <img src="{{ url_for('static', filename='Encabezado.jpg') }}" alt="Encabezado" style="width: 100%; max-width: 800px; height: auto; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
-
-  <!-- Logo -->
-  <img src="{{ url_for('static', filename='LogoPartyBox.png') }}" alt="Logo Party Box" style="width: 180px; margin-bottom: 20px;">
-
-  <!-- Catálogo o imagen decorativa -->
-  <img src="{{ url_for('static', filename='Catalogo.jpg') }}" alt="Catálogo" style="width: 100%; max-width: 600px; height: auto; border-radius: 10px; margin-top: 10px;">
+<div style="text-align: center; padding: 10px;">
+  <img src="{{ url_for('static', filename='Inicio.png') }}"
+       alt="Bienvenida Party Box"
+       style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" />
 </div>
 {% endblock %}
-
-
