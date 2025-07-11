@@ -8,18 +8,18 @@
     <div style="display: flex; flex-wrap: wrap; gap: 16px;">
 
       <div style="flex: 1 1 200px;">
-        <label>Fecha:</label>
-        <input type="date" name="Fecha" class="form-control" required>
+        <label style="text-align: left; display: block;">Fecha:</label>
+        <input type="date" name="Fecha" class="form-control" style="text-align: right;" required>
       </div>
 
       <div style="flex: 1 1 200px;">
-        <label>N° Documento:</label>
-        <input type="text" name="N_Documento" class="form-control" required>
+        <label style="text-align: left; display: block;">N° Documento:</label>
+        <input type="text" name="N_Documento" class="form-control" style="text-align: right;" required>
       </div>
 
       <div style="flex: 1 1 200px;">
-        <label>Proveedor:</label>
-        <select name="Proveedor" class="form-control" required>
+        <label style="text-align: left; display: block;">Proveedor:</label>
+        <select name="Proveedor" class="form-control" style="text-align: right;" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
             <option value="{{ p }}">{{ p }}</option>
@@ -28,8 +28,8 @@
       </div>
 
       <div style="flex: 1 1 200px;">
-        <label>Producto:</label>
-        <select name="Producto" class="form-control" required>
+        <label style="text-align: left; display: block;">Producto:</label>
+        <select name="Producto" class="form-control" style="text-align: right;" required>
           <option value="">Seleccione...</option>
           {% for p in productos %}
             <option value="{{ p }}">{{ p }}</option>
@@ -38,18 +38,18 @@
       </div>
 
       <div style="flex: 1 1 100px;">
-        <label>Cantidad:</label>
-        <input type="number" name="Cantidad" step="any" class="form-control" required>
+        <label style="text-align: left; display: block;">Cantidad:</label>
+        <input type="number" name="Cantidad" step="any" class="form-control" style="text-align: right;" required>
       </div>
 
       <div style="flex: 1 1 120px;">
-        <label>Precio Unitario:</label>
-        <input type="number" name="PrecioUnitario" step="any" class="form-control" required>
+        <label style="text-align: left; display: block;">Precio Unitario:</label>
+        <input type="number" name="PrecioUnitario" step="any" class="form-control" style="text-align: right;" required>
       </div>
 
       <div style="flex: 1 1 100px;">
-        <label>Moneda:</label>
-        <select name="Moneda" class="form-control" required>
+        <label style="text-align: left; display: block;">Moneda:</label>
+        <select name="Moneda" class="form-control" style="text-align: right;" required>
           <option value="">Seleccione...</option>
           <option value="₡">₡</option>
           <option value="$">$</option>
@@ -58,8 +58,8 @@
       </div>
 
       <div style="flex: 1 1 150px;">
-        <label>Forma de Pago:</label>
-        <select name="Forma_Pago" class="form-control" required>
+        <label style="text-align: left; display: block;">Forma de Pago:</label>
+        <select name="Forma_Pago" class="form-control" style="text-align: right;" required>
           <option value="">Seleccione...</option>
           <option value="Efectivo">Efectivo</option>
           <option value="SINPE">SINPE</option>
@@ -68,18 +68,19 @@
       </div>
 
       <div style="flex: 1 1 100%;">
-        <label>Observaciones:</label>
-        <textarea name="Observaciones" rows="2" class="form-control"></textarea>
+        <label style="text-align: left; display: block;">Observaciones:</label>
+        <textarea name="Observaciones" rows="2" class="form-control" style="text-align: right;"></textarea>
       </div>
     </div>
 
-    <div style="margin-top: 25px; text-align: center;">
-      <a href="/" class="btn btn-secondary" style="margin-right: 20px;">Cancelar</a>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="/" class="btn btn-danger" style="margin-right: 20px;">Cancelar</a>
+      <button type="submit" class="btn btn-success">Guardar</button>
     </div>
   </form>
 </div>
 {% endblock %}
+
 
 
 
