@@ -2,10 +2,17 @@ from flask import Flask, render_template, request, redirect
 from config_loader import cargar_configuracion
 import pandas as pd
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
 import os
+import csv
 
 app = Flask(__name__)
+
+# Directorios y archivos
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
+
+ARCHIVO_PROVEEDORES = os.path.join(DATA_DIR, 'proveedores.csv')
 
 @app.route('/')
 def inicio():
@@ -20,8 +27,6 @@ def configuracion():
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
     config = cargar_configuracion()
-    url_proveedores = config.get('URLProveedores', '')
-    url_productos = config.get('URLProductos', '')
     url_script = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
 
     if request.method == 'POST':
@@ -46,39 +51,52 @@ def compras():
 
         return redirect('/compras')
 
+    # 🔽 Leemos proveedores desde archivo local
     proveedores = []
-    productos = []
+    if os.path.isfile(ARCHIVO_PROVEEDORES):
+        try:
+            with open(ARCHIVO_PROVEEDORES, newline='', encoding='utf-8') as archivo:
+                reader = csv.DictReader(archivo)
+                proveedores = [fila['Nombre'] for fila in reader if fila['Nombre']]
+        except Exception as e:
+            print("⚠️ Error leyendo proveedores:", e)
 
-    try:
-        df_prov = pd.read_csv(url_proveedores)
-        proveedores = df_prov.iloc[:, 0].dropna().tolist()
-    except Exception as e:
-        print("⚠️ Error cargando proveedores:", e)
+    # 🔽 Productos será temporal hasta crear archivo
+    productos = ['Producto 1', 'Producto 2', 'Producto 3']
 
-    try:
-        df_prod = pd.read_csv(url_productos)
-        productos = df_prod.iloc[:, 0].dropna().tolist()
-    except Exception as e:
-        print("⚠️ Error cargando productos:", e)
-
-    return render_template('compras.html', config=config,
+    return render_template('compras.html',
+                           config=config,
                            proveedores=proveedores,
                            productos=productos)
 
-# --- 🔁 Auto-ping para mantener la app activa ---
-def hacer_ping():
-    url = "https://app-emprendimiento.onrender.com/"
-    try:
-        respuesta = requests.get(url)
-        print(f"🔄 Auto-ping enviado: {respuesta.status_code}")
-    except Exception as e:
-        print("❌ Error en auto-ping:", e)
+@app.route('/proveedores', methods=['GET', 'POST'])
+def registrar_proveedor():
+    tipos = ['Librería', 'Suministros', 'Servicios', 'Otros']
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(hacer_ping, 'interval', minutes=14)
-scheduler.start()
+    if request.method == 'POST':
+        datos = {
+            'Nombre': request.form['Nombre'],
+            'Teléfono': request.form['Teléfono'],
+            'Email': request.form['Email'],
+            'Contacto': request.form['Contacto'],
+            'Celular': request.form['Celular'],
+            'Tipo': request.form['Tipo'],
+            'Observaciones': request.form['Observaciones']
+        }
+
+        archivo_existe = os.path.isfile(ARCHIVO_PROVEEDORES)
+        with open(ARCHIVO_PROVEEDORES, 'a', newline='', encoding='utf-8') as archivo:
+            writer = csv.DictWriter(archivo, fieldnames=datos.keys())
+            if not archivo_existe:
+                writer.writeheader()
+            writer.writerow(datos)
+
+        return redirect('/proveedores')
+
+    return render_template('proveedores.html', tipos=tipos)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
