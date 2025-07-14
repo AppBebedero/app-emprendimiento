@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Registrar Compra{% endblock %}
+
 {% block content %}
 <style>
   .formulario {
@@ -36,23 +37,24 @@
     flex: 1 1 45%;
   }
 
-  .campo-mas {
+  .input-con-boton {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 15px;
   }
 
-  .campo-mas button {
-    border: none;
-    background: none;
-    font-size: 22px;
-    padding: 0 5px;
-    cursor: pointer;
+  .input-con-boton select {
+    flex-grow: 1;
   }
 
-  .campo-mas button:hover {
-    transform: scale(1.2);
+  .btn-agregar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #0d6efd;
+    cursor: pointer;
+    padding: 0 6px;
   }
 
   .botones {
@@ -94,6 +96,7 @@
         <label>Fecha:</label>
         <input type="date" name="Fecha" required>
       </div>
+
       <div>
         <label>N° Documento:</label>
         <input type="text" name="N_Documento" required>
@@ -102,27 +105,27 @@
 
     <div>
       <label>Proveedor:</label>
-      <div class="campo-mas">
+      <div class="input-con-boton">
         <select name="Proveedor" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
-            <option value="{{ p }}" {% if p == seleccionado_proveedor %}selected{% endif %}>{{ p }}</option>
+            <option value="{{ p }}" {% if seleccionado == p %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" title="Agregar proveedor" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
+        <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
       </div>
     </div>
 
     <div>
       <label>Producto:</label>
-      <div class="campo-mas">
+      <div class="input-con-boton">
         <select name="Producto" required>
           <option value="">Seleccione...</option>
           {% for p in productos %}
-            <option value="{{ p }}" {% if p == seleccionado_producto %}selected{% endif %}>{{ p }}</option>
+            <option value="{{ p }}" {% if producto_seleccionado == p %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" title="Agregar producto" data-bs-toggle="modal" data-bs-target="#modalProducto">➕</button>
+        <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
       </div>
     </div>
 
@@ -131,6 +134,7 @@
         <label>Cantidad:</label>
         <input type="number" name="Cantidad" step="any" required>
       </div>
+
       <div>
         <label>Precio Unitario:</label>
         <input type="number" name="PrecioUnitario" step="any" required>
@@ -147,6 +151,7 @@
           <option value="€">€</option>
         </select>
       </div>
+
       <div>
         <label>Forma de Pago:</label>
         <select name="Forma_Pago" required>
@@ -170,63 +175,39 @@
   </form>
 </div>
 
-<!-- Modal Nuevo Proveedor -->
+<!-- Modal Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" method="POST" action="/nuevo_proveedor">
-      <div class="modal-header">
-        <h5 class="modal-title">➕ Nuevo Proveedor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Nombre del Proveedor</label>
-          <input type="text" class="form-control" name="NombreProveedor" required>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <form method="POST" action="/nuevo_proveedor">
+        <h5 class="mb-3 text-center">Agregar Nuevo Proveedor</h5>
+        <input type="text" name="NombreProveedor" class="form-control mb-2" placeholder="Nombre" required>
+        <input type="text" name="ContactoProveedor" class="form-control mb-2" placeholder="Contacto">
+        <input type="text" name="TelefonoProveedor" class="form-control mb-2" placeholder="Teléfono">
+        <div class="text-center mt-3">
+          <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Contacto</label>
-          <input type="text" class="form-control" name="ContactoProveedor">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Teléfono</label>
-          <input type="text" class="form-control" name="TelefonoProveedor">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-success">Guardar Proveedor</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 
-<!-- Modal Nuevo Producto -->
+<!-- Modal Producto -->
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" method="POST" action="/nuevo_producto">
-      <div class="modal-header">
-        <h5 class="modal-title">➕ Nuevo Producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Nombre del Producto</label>
-          <input type="text" class="form-control" name="NombreProducto" required>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <form method="POST" action="/nuevo_producto">
+        <h5 class="mb-3 text-center">Agregar Nuevo Producto</h5>
+        <input type="text" name="NombreProducto" class="form-control mb-2" placeholder="Nombre" required>
+        <input type="text" name="CategoriaProducto" class="form-control mb-2" placeholder="Categoría">
+        <input type="text" name="UnidadProducto" class="form-control mb-2" placeholder="Unidad">
+        <div class="text-center mt-3">
+          <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Categoría</label>
-          <input type="text" class="form-control" name="CategoriaProducto">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Unidad</label>
-          <input type="text" class="form-control" name="UnidadProducto">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-success">Guardar Producto</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}
