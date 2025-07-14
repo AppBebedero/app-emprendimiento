@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import os
 import csv
+import re  # Import necesario para limpieza de nombres
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
@@ -79,6 +80,7 @@ def compras():
                            productos=productos,
                            seleccionado=seleccionado)
 
+# --- Nuevo proveedor desde modal ---
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
     config = cargar_configuracion()
@@ -92,18 +94,20 @@ def nuevo_proveedor():
     contacto = request.form['ContactoProveedor'].strip()
     telefono = request.form['TelefonoProveedor'].strip()
 
-    # ✅ Descargar CSV actualizado antes de validar duplicados
-    descargar_csv(url_csv, archivo_local)
+    def limpiar_nombre(nombre):
+        return re.sub(r'\b(s\.?a\.?|srl|ltda)\b', '', nombre, flags=re.IGNORECASE).strip().lower()
 
     existentes = []
-    try:
-        df = pd.read_csv(archivo_local)
-        existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
-    except: pass
+    if os.path.exists(archivo_local):
+        try:
+            df = pd.read_csv(archivo_local)
+            existentes = [limpiar_nombre(p) for p in df['Nombre'].dropna().tolist()]
+        except: pass
 
-    if nombre.lower() in existentes:
-        flash("⚠️ Ya existe un proveedor con ese nombre.")
-        return redirect('/compras')
+    nombre_limpio = limpiar_nombre(nombre)
+
+    if nombre_limpio in existentes:
+        flash("⚠️ Ya existe un proveedor con ese nombre o nombre similar.")
     else:
         datos = {
             'tipo': 'proveedor',
@@ -125,6 +129,7 @@ def nuevo_proveedor():
 
     return redirect(f"/compras?seleccionado={nombre}")
 
+# --- Vista de proveedores tradicional ---
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
     config = cargar_configuracion()
@@ -220,4 +225,5 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
