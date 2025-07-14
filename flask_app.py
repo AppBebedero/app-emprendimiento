@@ -76,6 +76,46 @@ def compras():
                            proveedores=proveedores,
                            productos=productos)
 
+@app.route('/nuevo_proveedor', methods=['POST'])
+def nuevo_proveedor():
+    config = cargar_configuracion()
+    url_script = config.get('URLScriptProveedores', '')
+
+    nombre = request.form['NombreProveedor'].strip()
+    contacto = request.form['ContactoProveedor'].strip()
+    telefono = request.form['TelefonoProveedor'].strip()
+
+    # Verificar si ya existe
+    archivo_local = 'data/proveedores.csv'
+    existentes = []
+    if os.path.exists(archivo_local):
+        try:
+            df = pd.read_csv(archivo_local)
+            existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
+        except: pass
+
+    if nombre.lower() in existentes:
+        flash("⚠️ Ya existe un proveedor con ese nombre.")
+    else:
+        datos = {
+            'tipo': 'proveedor',
+            'Nombre': nombre,
+            'Teléfono': telefono,
+            'Email': '',
+            'Contacto': contacto,
+            'Celular': '',
+            'Tipo': '',
+            'Observaciones': ''
+        }
+        try:
+            requests.post(url_script, json=datos)
+            flash("✅ Proveedor agregado correctamente.")
+        except Exception as e:
+            flash("❌ Error al guardar el proveedor.")
+            print("Error en nuevo_proveedor:", e)
+
+    return redirect('/compras')
+
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
     config = cargar_configuracion()
@@ -173,4 +213,5 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
