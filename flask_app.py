@@ -4,7 +4,6 @@ import pandas as pd
 import requests
 import os
 import csv
-import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
@@ -12,6 +11,7 @@ app.config['SECRET_KEY'] = 'clave-secreta'
 # Crear carpeta /data si no existe
 os.makedirs("data", exist_ok=True)
 
+# Utilidad para descargar CSV desde Google Sheets
 def descargar_csv(desde_url, hacia_archivo):
     try:
         respuesta = requests.get(desde_url)
@@ -23,9 +23,6 @@ def descargar_csv(desde_url, hacia_archivo):
             print(f"❌ Error al descargar CSV: {respuesta.status_code}")
     except Exception as e:
         print("❌ Error al descargar CSV:", e)
-
-def limpiar_nombre(nombre):
-    return re.sub(r'\b(s\.?a\.?|srl|ltda)\b', '', nombre, flags=re.IGNORECASE).strip().lower()
 
 @app.route('/')
 def inicio():
@@ -64,6 +61,7 @@ def compras():
             print("Error compras:", e)
         return redirect('/compras')
 
+    # Precarga rápida desde CSV
     proveedores, productos = [], []
     try:
         df_prov = pd.read_csv('data/proveedores.csv')
@@ -74,12 +72,14 @@ def compras():
         productos = df_prod['Nombre'].dropna().tolist()
     except: pass
 
-    seleccionado = request.args.get("seleccionado", "")
+    seleccionado_proveedor = request.args.get("seleccionado", "")
+    seleccionado_producto = request.args.get("producto", "")
 
     return render_template('compras.html', config=config,
                            proveedores=proveedores,
                            productos=productos,
-                           seleccionado=seleccionado)
+                           seleccionado=seleccionado_proveedor,
+                           producto_seleccionado=seleccionado_producto)
 
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
@@ -93,18 +93,16 @@ def nuevo_proveedor():
     nombre = request.form['NombreProveedor'].strip()
     contacto = request.form['ContactoProveedor'].strip()
     telefono = request.form['TelefonoProveedor'].strip()
-    nombre_limpio = limpiar_nombre(nombre)
 
     existentes = []
     if os.path.exists(archivo_local):
         try:
             df = pd.read_csv(archivo_local)
-            existentes = [limpiar_nombre(p) for p in df['Nombre'].dropna().tolist()]
-        except:
-            pass
+            existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
+        except: pass
 
-    if nombre_limpio in existentes:
-        flash("⚠️ Ya existe un proveedor con ese nombre o nombre similar.")
+    if nombre.lower() in existentes:
+        flash("⚠️ Ya existe un proveedor con ese nombre.")
     else:
         datos = {
             'tipo': 'proveedor',
@@ -126,6 +124,47 @@ def nuevo_proveedor():
 
     return redirect(f"/compras?seleccionado={nombre}")
 
+@app.route('/nuevo_producto', methods=['POST'])
+def nuevo_producto():
+    config = cargar_configuracion()
+    url_script = config.get('URLScriptProductos', '')
+    hoja_id = '1AGm3J7Jv5zxbKpQ-M8fveoV2-41xdb2OSYSkyKRyhlg'
+    gid = '491018015'
+    url_csv = f'https://docs.google.com/spreadsheets/d/{hoja_id}/export?format=csv&gid={gid}'
+    archivo_local = 'data/productos.csv'
+
+    nombre = request.form['NombreProducto'].strip()
+    categoria = request.form['CategoriaProducto'].strip()
+    unidad = request.form['UnidadProducto'].strip()
+
+    existentes = []
+    if os.path.exists(archivo_local):
+        try:
+            df = pd.read_csv(archivo_local)
+            existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
+        except: pass
+
+    if nombre.lower() in existentes:
+        flash("⚠️ Ya existe un producto con ese nombre.")
+    else:
+        datos = {
+            'tipo': 'producto',
+            'Nombre': nombre,
+            'Categoría': categoria,
+            'Unidad': unidad,
+            'Proveedor': '',
+            'Observaciones': ''
+        }
+        try:
+            requests.post(url_script, json=datos)
+            flash("✅ Producto agregado correctamente.")
+            descargar_csv(url_csv, archivo_local)
+        except Exception as e:
+            flash("❌ Error al guardar el producto.")
+            print("Error en nuevo_producto:", e)
+
+    return redirect(f"/compras?producto={nombre}")
+
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
     config = cargar_configuracion()
@@ -141,16 +180,14 @@ def proveedores():
     if os.path.exists(archivo_local):
         try:
             df = pd.read_csv(archivo_local)
-            existentes = [limpiar_nombre(p) for p in df['Nombre'].dropna().tolist()]
-        except:
-            pass
+            existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
+        except: pass
 
     if request.method == 'POST':
-        nombre = request.form['Nombre'].strip()
-        nombre_limpio = limpiar_nombre(nombre)
+        nombre_nuevo = request.form['Nombre'].strip().lower()
         datos = {
             'tipo': 'proveedor',
-            'Nombre': nombre,
+            'Nombre': request.form['Nombre'].strip(),
             'Teléfono': request.form['Telefono'],
             'Email': request.form['Email'],
             'Contacto': request.form['Contacto'],
@@ -159,7 +196,8 @@ def proveedores():
             'Observaciones': request.form['Observaciones']
         }
 
-        if nombre_limpio in existentes:
+        duplicado = any(nombre_nuevo in p or p in nombre_nuevo for p in existentes)
+        if duplicado:
             flash("⚠️ Ya existe un proveedor con nombre similar.")
         else:
             try:
@@ -191,22 +229,22 @@ def productos():
     except: pass
     try:
         df_prod = pd.read_csv(archivo_local)
-        existentes = [limpiar_nombre(p) for p in df_prod['Nombre'].dropna().tolist()]
+        existentes = [p.strip().lower() for p in df_prod['Nombre'].dropna().tolist()]
     except: pass
 
     if request.method == 'POST':
-        nombre = request.form['Nombre'].strip()
-        nombre_limpio = limpiar_nombre(nombre)
+        nombre_nuevo = request.form['Nombre'].strip().lower()
         datos = {
             'tipo': 'producto',
-            'Nombre': nombre,
+            'Nombre': request.form['Nombre'].strip(),
             'Categoría': request.form['Categoría'],
             'Unidad': request.form['Unidad'],
             'Proveedor': request.form['Proveedor'],
             'Observaciones': request.form['Observaciones']
         }
 
-        if nombre_limpio in existentes:
+        duplicado = any(nombre_nuevo in p or p in nombre_nuevo for p in existentes)
+        if duplicado:
             flash("⚠️ Ya existe un producto con nombre similar.")
         else:
             try:
@@ -222,6 +260,3 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
