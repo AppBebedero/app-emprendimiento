@@ -3,7 +3,6 @@ from config_loader import cargar_configuracion
 import pandas as pd
 import requests
 import os
-import csv
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
@@ -11,7 +10,7 @@ app.config['SECRET_KEY'] = 'clave-secreta'
 # Crear carpeta /data si no existe
 os.makedirs("data", exist_ok=True)
 
-# Utilidad para descargar CSV desde Google Sheets
+# Función para descargar CSV desde Google Sheets
 def descargar_csv(desde_url, hacia_archivo):
     try:
         respuesta = requests.get(desde_url)
@@ -34,9 +33,6 @@ def inicio():
 @app.route('/configuracion', methods=['GET', 'POST'])
 def configuracion():
     config = cargar_configuracion()
-    if request.method == 'POST':
-        # Aquí podrías manejar el guardado de nuevas URLs en Google Sheets si lo deseas
-        pass
     return render_template('configuracion.html', config=config)
 
 # Compras
@@ -67,7 +63,10 @@ def compras():
             print("Error compras:", e)
         return redirect('/compras')
 
-    # Precarga rápida desde CSV
+    # Precargar CSVs actualizados
+    descargar_csv(config['URLProveedores'], 'data/proveedores.csv')
+    descargar_csv(config['URLProductos'], 'data/productos.csv')
+
     proveedores, productos = [], []
     try:
         df_prov = pd.read_csv('data/proveedores.csv')
@@ -87,13 +86,12 @@ def compras():
 def proveedores():
     config = cargar_configuracion()
     url_script = config.get('URLScriptProveedores', '')
-    # URL pública para descarga CSV
-    hoja_id = '1AGm3J7Jv5zxbKpQ-M8fveoV2-41xdb2OSYSkyKRyhlg'
-    gid = '129758967'
-    url_csv = f'https://docs.google.com/spreadsheets/d/{hoja_id}/export?format=csv&gid={gid}'
+    url_csv = config.get('URLProveedores', '')
     archivo_local = 'data/proveedores.csv'
 
-    # Lista de existentes para duplicados
+    # Descargar CSV actualizado
+    descargar_csv(url_csv, archivo_local)
+
     existentes = []
     if os.path.exists(archivo_local):
         try:
@@ -114,7 +112,6 @@ def proveedores():
             'Observaciones': request.form['Observaciones']
         }
 
-        # Detección parcial
         duplicado = any(nombre_nuevo in p.lower() or p.lower() in nombre_nuevo for p in existentes)
         if duplicado:
             flash("⚠️ Ya existe un proveedor con nombre similar.")
@@ -135,24 +132,22 @@ def proveedores():
 def productos():
     config = cargar_configuracion()
     url_script = config.get('URLScriptProductos', '')
-    # URL pública para descarga CSV
-    hoja_id = '1AGm3J7Jv5zxbKpQ-M8fveoV2-41xdb2OSYSkyKRyhlg'
-    gid = '491018015'
-    url_csv = f'https://docs.google.com/spreadsheets/d/{hoja_id}/export?format=csv&gid={gid}'
+    url_csv = config.get('URLProductos', '')
     archivo_local = 'data/productos.csv'
 
-    # Lista existentes
-    existentes = []
-    proveedores = []
+    # Descargar CSV actualizados (productos y proveedores)
+    descargar_csv(url_csv, archivo_local)
+    descargar_csv(config['URLProveedores'], 'data/proveedores.csv')
+
+    existentes, proveedores = [], []
+    try:
+        df_prod = pd.read_csv(archivo_local)
+        existentes = df_prod['Nombre'].dropna().tolist()
+    except: pass
     try:
         df_prov = pd.read_csv('data/proveedores.csv')
         proveedores = df_prov['Nombre'].dropna().tolist()
     except: pass
-    if os.path.exists(archivo_local):
-        try:
-            df_prod = pd.read_csv(archivo_local)
-            existentes = df_prod['Nombre'].dropna().tolist()
-        except: pass
 
     if request.method == 'POST':
         nombre_nuevo = request.form['Nombre'].strip().lower()
@@ -182,5 +177,3 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
