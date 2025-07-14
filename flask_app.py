@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = 'clave-secreta'
 # Crear carpeta /data si no existe
 os.makedirs("data", exist_ok=True)
 
-# Utilidad para descargar CSV desde Google Sheets
+# Función para descargar CSV desde Google Sheets
 def descargar_csv(desde_url, hacia_archivo):
     try:
         respuesta = requests.get(desde_url)
@@ -61,7 +61,7 @@ def compras():
             print("Error compras:", e)
         return redirect('/compras')
 
-    # Precarga rápida desde CSV
+    # Precarga desde CSV local
     proveedores, productos = [], []
     try:
         df_prov = pd.read_csv('data/proveedores.csv')
@@ -80,13 +80,15 @@ def compras():
 def nuevo_proveedor():
     config = cargar_configuracion()
     url_script = config.get('URLScriptProveedores', '')
+    hoja_id = '1AGm3J7Jv5zxbKpQ-M8fveoV2-41xdb2OSYSkyKRyhlg'
+    gid = '129758967'
+    url_csv = f'https://docs.google.com/spreadsheets/d/{hoja_id}/export?format=csv&gid={gid}'
+    archivo_local = 'data/proveedores.csv'
 
     nombre = request.form['NombreProveedor'].strip()
     contacto = request.form['ContactoProveedor'].strip()
     telefono = request.form['TelefonoProveedor'].strip()
 
-    # Verificar si ya existe
-    archivo_local = 'data/proveedores.csv'
     existentes = []
     if os.path.exists(archivo_local):
         try:
@@ -110,6 +112,7 @@ def nuevo_proveedor():
         try:
             requests.post(url_script, json=datos)
             flash("✅ Proveedor agregado correctamente.")
+            descargar_csv(url_csv, archivo_local)  # Actualiza CSV local
         except Exception as e:
             flash("❌ Error al guardar el proveedor.")
             print("Error en nuevo_proveedor:", e)
@@ -125,7 +128,6 @@ def proveedores():
     url_csv = f'https://docs.google.com/spreadsheets/d/{hoja_id}/export?format=csv&gid={gid}'
     archivo_local = 'data/proveedores.csv'
 
-    # Descargar CSV actualizado
     descargar_csv(url_csv, archivo_local)
 
     existentes = []
@@ -148,7 +150,6 @@ def proveedores():
             'Observaciones': request.form['Observaciones']
         }
 
-        # Detección de duplicados exactos o parciales
         duplicado = any(nombre_nuevo in p or p in nombre_nuevo for p in existentes)
         if duplicado:
             flash("⚠️ Ya existe un proveedor con nombre similar.")
@@ -213,5 +214,6 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
