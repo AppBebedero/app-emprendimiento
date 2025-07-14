@@ -61,7 +61,7 @@ def compras():
             print("Error compras:", e)
         return redirect('/compras')
 
-    # Precarga desde CSV local
+    # Precarga desde CSV
     proveedores, productos = [], []
     try:
         df_prov = pd.read_csv('data/proveedores.csv')
@@ -72,9 +72,12 @@ def compras():
         productos = df_prod['Nombre'].dropna().tolist()
     except: pass
 
+    seleccionado = request.args.get("seleccionado", "")
+
     return render_template('compras.html', config=config,
                            proveedores=proveedores,
-                           productos=productos)
+                           productos=productos,
+                           seleccionado=seleccionado)
 
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
@@ -112,12 +115,12 @@ def nuevo_proveedor():
         try:
             requests.post(url_script, json=datos)
             flash("✅ Proveedor agregado correctamente.")
-            descargar_csv(url_csv, archivo_local)  # Actualiza CSV local
+            descargar_csv(url_csv, archivo_local)
         except Exception as e:
             flash("❌ Error al guardar el proveedor.")
             print("Error en nuevo_proveedor:", e)
 
-    return redirect('/compras')
+    return redirect(f"/compras?seleccionado={nombre}")
 
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
@@ -214,6 +217,3 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
