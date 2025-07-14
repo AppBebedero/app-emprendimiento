@@ -101,7 +101,7 @@ def nuevo_proveedor():
 
     if nombre.lower() in existentes:
         flash("⚠️ Ya existe un proveedor con ese nombre.")
-        return redirect('/compras')
+        return redirect('/compras')  # ← LÍNEA CLAVE QUE DETIENE EL DUPLICADO
 
     datos = {
         'tipo': 'proveedor',
@@ -220,3 +220,4 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
