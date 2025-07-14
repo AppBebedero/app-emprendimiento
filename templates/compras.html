@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Registrar Compra{% endblock %}
-
 {% block content %}
 <style>
   .formulario {
@@ -27,6 +26,22 @@
     border: 1px solid #ccc;
   }
 
+  .inline-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-agregar {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #007bff;
+    padding: 0;
+    margin-top: -8px;
+    cursor: pointer;
+  }
+
   .fila-doble {
     display: flex;
     gap: 16px;
@@ -35,26 +50,6 @@
 
   .fila-doble > div {
     flex: 1 1 45%;
-  }
-
-  .input-con-boton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 15px;
-  }
-
-  .input-con-boton select {
-    flex-grow: 1;
-  }
-
-  .btn-agregar {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #0d6efd;
-    cursor: pointer;
-    padding: 0 6px;
   }
 
   .botones {
@@ -91,42 +86,30 @@
   <h2 style="text-align: center; margin-bottom: 20px;">🧾 Registrar Compra</h2>
 
   <form method="POST">
-    <div class="fila-doble">
-      <div>
-        <label>Fecha:</label>
-        <input type="date" name="Fecha" required>
-      </div>
-
-      <div>
-        <label>N° Documento:</label>
-        <input type="text" name="N_Documento" required>
-      </div>
-    </div>
-
-    <div>
-      <label>Proveedor:</label>
-      <div class="input-con-boton">
+    <div class="inline-btn">
+      <div style="flex-grow: 1;">
+        <label>Proveedor:</label>
         <select name="Proveedor" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
-            <option value="{{ p }}" {% if seleccionado == p %}selected{% endif %}>{{ p }}</option>
+            <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
       </div>
+      <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
     </div>
 
-    <div>
-      <label>Producto:</label>
-      <div class="input-con-boton">
+    <div class="inline-btn">
+      <div style="flex-grow: 1;">
+        <label>Producto:</label>
         <select name="Producto" required>
           <option value="">Seleccione...</option>
           {% for p in productos %}
-            <option value="{{ p }}" {% if producto_seleccionado == p %}selected{% endif %}>{{ p }}</option>
+            <option value="{{ p }}" {% if p == producto_seleccionado %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
       </div>
+      <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
     </div>
 
     <div class="fila-doble">
@@ -175,39 +158,72 @@
   </form>
 </div>
 
-<!-- Modal Proveedor -->
+<!-- Modal Nuevo Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3">
-      <form method="POST" action="/nuevo_proveedor">
-        <h5 class="mb-3 text-center">Agregar Nuevo Proveedor</h5>
-        <input type="text" name="NombreProveedor" class="form-control mb-2" placeholder="Nombre" required>
-        <input type="text" name="ContactoProveedor" class="form-control mb-2" placeholder="Contacto">
-        <input type="text" name="TelefonoProveedor" class="form-control mb-2" placeholder="Teléfono">
-        <div class="text-center mt-3">
-          <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar</button>
+  <div class="modal-dialog">
+    <form method="POST" action="/nuevo_proveedor">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalProveedorLabel">➕ Nuevo Proveedor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-      </form>
-    </div>
+        <div class="modal-body">
+          <label>Nombre:</label>
+          <input type="text" name="NombreProveedor" required>
+          <label>Contacto:</label>
+          <input type="text" name="ContactoProveedor">
+          <label>Teléfono:</label>
+          <input type="text" name="TelefonoProveedor">
+          <label>Tipo de Negocio:</label>
+          <select name="TipoProveedor" required>
+            <option value="">Seleccione...</option>
+            {% for tipo in tipos_negocio %}
+              <option value="{{ tipo }}">{{ tipo }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 
-<!-- Modal Producto -->
+<!-- Modal Nuevo Producto -->
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3">
-      <form method="POST" action="/nuevo_producto">
-        <h5 class="mb-3 text-center">Agregar Nuevo Producto</h5>
-        <input type="text" name="NombreProducto" class="form-control mb-2" placeholder="Nombre" required>
-        <input type="text" name="CategoriaProducto" class="form-control mb-2" placeholder="Categoría">
-        <input type="text" name="UnidadProducto" class="form-control mb-2" placeholder="Unidad">
-        <div class="text-center mt-3">
-          <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success">Guardar</button>
+  <div class="modal-dialog">
+    <form method="POST" action="/nuevo_producto">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalProductoLabel">➕ Nuevo Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-      </form>
-    </div>
+        <div class="modal-body">
+          <label>Nombre:</label>
+          <input type="text" name="NombreProducto" required>
+          <label>Categoría:</label>
+          <select name="CategoriaProducto" required>
+            <option value="">Seleccione...</option>
+            {% for cat in categorias %}
+              <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+          </select>
+          <label>Unidad:</label>
+          <select name="UnidadProducto" required>
+            <option value="">Seleccione...</option>
+            {% for un in unidades %}
+              <option value="{{ un }}">{{ un }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
