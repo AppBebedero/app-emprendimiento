@@ -66,18 +66,10 @@
   }
 
   .btn-mas {
-    padding: 6px 10px;
-    background-color: #198754;
     border: none;
-    border-radius: 4px;
-    color: white;
-    font-size: 18px;
-    margin-left: 6px;
-  }
-
-  .btn-mas:hover {
-    opacity: 0.9;
-    cursor: pointer;
+    background: none;
+    font-size: 22px;
+    padding-left: 10px;
   }
 </style>
 
@@ -97,29 +89,29 @@
       </div>
     </div>
 
-    <div class="fila-doble">
-      <div>
-        <label>Proveedor:</label>
-        <div style="display: flex; align-items: center;">
-          <select name="Proveedor" required style="flex: 1;">
-            <option value="">Seleccione...</option>
-            {% for p in proveedores %}
-              <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
-            {% endfor %}
-          </select>
-          <button type="button" class="btn-mas" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
-        </div>
-      </div>
-
-      <div>
-        <label>Producto:</label>
-        <select name="Producto" required>
+    <div>
+      <label>Proveedor:</label>
+      <div style="display: flex; align-items: center;">
+        <select name="Proveedor" required>
           <option value="">Seleccione...</option>
-          {% for p in productos %}
-            <option value="{{ p }}">{{ p }}</option>
+          {% for p in proveedores %}
+            <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
+        <button type="button" class="btn-mas text-primary" data-bs-toggle="modal" data-bs-target="#modalProveedor" title="Agregar nuevo proveedor">
+          ➕
+        </button>
       </div>
+    </div>
+
+    <div>
+      <label>Producto:</label>
+      <select name="Producto" required>
+        <option value="">Seleccione...</option>
+        {% for p in productos %}
+          <option value="{{ p }}">{{ p }}</option>
+        {% endfor %}
+      </select>
     </div>
 
     <div class="fila-doble">
@@ -198,5 +190,3 @@
   </div>
 </div>
 {% endblock %}
-
-
