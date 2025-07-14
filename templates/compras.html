@@ -26,6 +26,35 @@
     border: 1px solid #ccc;
   }
 
+  .fila-doble {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .fila-doble > div {
+    flex: 1 1 45%;
+  }
+
+  .campo-mas {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .campo-mas button {
+    border: none;
+    background: none;
+    font-size: 22px;
+    padding: 0 5px;
+    cursor: pointer;
+  }
+
+  .campo-mas button:hover {
+    transform: scale(1.2);
+  }
+
   .botones {
     text-align: center;
     margin-top: 25px;
@@ -54,20 +83,6 @@
     opacity: 0.9;
     cursor: pointer;
   }
-
-  .select-con-boton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .select-con-boton button {
-    border: none;
-    background: none;
-    font-size: 20px;
-    padding: 0 8px;
-    cursor: pointer;
-  }
 </style>
 
 <div class="formulario">
@@ -87,27 +102,27 @@
 
     <div>
       <label>Proveedor:</label>
-      <div class="select-con-boton">
-        <select name="Proveedor" class="form-select" required>
+      <div class="campo-mas">
+        <select name="Proveedor" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
-            <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
+            <option value="{{ p }}" {% if p == seleccionado_proveedor %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
+        <button type="button" title="Agregar proveedor" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
       </div>
     </div>
 
     <div>
       <label>Producto:</label>
-      <div class="select-con-boton">
+      <div class="campo-mas">
         <select name="Producto" required>
           <option value="">Seleccione...</option>
           {% for p in productos %}
-            <option value="{{ p }}">{{ p }}</option>
+            <option value="{{ p }}" {% if p == seleccionado_producto %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" data-bs-toggle="modal" data-bs-target="#modalProducto">➕</button>
+        <button type="button" title="Agregar producto" data-bs-toggle="modal" data-bs-target="#modalProducto">➕</button>
       </div>
     </div>
 
@@ -155,13 +170,13 @@
   </form>
 </div>
 
-<!-- Modal Proveedor -->
+<!-- Modal Nuevo Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" method="POST" action="/nuevo_proveedor">
       <div class="modal-header">
         <h5 class="modal-title">➕ Nuevo Proveedor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
@@ -185,13 +200,13 @@
   </div>
 </div>
 
-<!-- Modal Producto -->
+<!-- Modal Nuevo Producto -->
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" method="POST" action="/nuevo_producto">
       <div class="modal-header">
         <h5 class="modal-title">➕ Nuevo Producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
