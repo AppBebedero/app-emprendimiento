@@ -64,26 +64,6 @@
     opacity: 0.9;
     cursor: pointer;
   }
-
-  .input-con-boton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn-mas {
-    padding: 5px 10px;
-    font-size: 1rem;
-    border-radius: 4px;
-    background-color: #0d6efd;
-    color: white;
-    border: none;
-  }
-
-  .btn-mas:hover {
-    background-color: #0b5ed7;
-    cursor: pointer;
-  }
 </style>
 
 <div class="formulario">
@@ -105,14 +85,16 @@
     <div class="fila-doble">
       <div>
         <label>Proveedor:</label>
-        <div class="input-con-boton">
-          <select name="Proveedor" required>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <select name="Proveedor" class="form-select" style="flex: 1;" required>
             <option value="">Seleccione...</option>
             {% for p in proveedores %}
-              <option value="{{ p }}">{{ p }}</option>
+              <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
             {% endfor %}
           </select>
-          <button type="button" class="btn-mas" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
+          <button type="button" class="btn btn-primary" style="padding: 5px 12px;" data-bs-toggle="modal" data-bs-target="#modalProveedor">
+            <span style="color: white;">➕</span>
+          </button>
         </div>
       </div>
 
@@ -173,7 +155,7 @@
   </form>
 </div>
 
-<!-- Modal Nuevo Proveedor -->
+<!-- Modal para Nuevo Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" method="POST" action="/nuevo_proveedor">
