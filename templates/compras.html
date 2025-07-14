@@ -26,16 +26,6 @@
     border: 1px solid #ccc;
   }
 
-  .fila-doble {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .fila-doble > div {
-    flex: 1 1 45%;
-  }
-
   .botones {
     text-align: center;
     margin-top: 25px;
@@ -65,11 +55,18 @@
     cursor: pointer;
   }
 
-  .btn-mas {
+  .select-con-boton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .select-con-boton button {
     border: none;
     background: none;
-    font-size: 22px;
-    padding-left: 10px;
+    font-size: 20px;
+    padding: 0 8px;
+    cursor: pointer;
   }
 </style>
 
@@ -82,7 +79,6 @@
         <label>Fecha:</label>
         <input type="date" name="Fecha" required>
       </div>
-
       <div>
         <label>N° Documento:</label>
         <input type="text" name="N_Documento" required>
@@ -91,27 +87,28 @@
 
     <div>
       <label>Proveedor:</label>
-      <div style="display: flex; align-items: center;">
-        <select name="Proveedor" required>
+      <div class="select-con-boton">
+        <select name="Proveedor" class="form-select" required>
           <option value="">Seleccione...</option>
           {% for p in proveedores %}
             <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
         </select>
-        <button type="button" class="btn-mas text-primary" data-bs-toggle="modal" data-bs-target="#modalProveedor" title="Agregar nuevo proveedor">
-          ➕
-        </button>
+        <button type="button" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
       </div>
     </div>
 
     <div>
       <label>Producto:</label>
-      <select name="Producto" required>
-        <option value="">Seleccione...</option>
-        {% for p in productos %}
-          <option value="{{ p }}">{{ p }}</option>
-        {% endfor %}
-      </select>
+      <div class="select-con-boton">
+        <select name="Producto" required>
+          <option value="">Seleccione...</option>
+          {% for p in productos %}
+            <option value="{{ p }}">{{ p }}</option>
+          {% endfor %}
+        </select>
+        <button type="button" data-bs-toggle="modal" data-bs-target="#modalProducto">➕</button>
+      </div>
     </div>
 
     <div class="fila-doble">
@@ -119,7 +116,6 @@
         <label>Cantidad:</label>
         <input type="number" name="Cantidad" step="any" required>
       </div>
-
       <div>
         <label>Precio Unitario:</label>
         <input type="number" name="PrecioUnitario" step="any" required>
@@ -136,7 +132,6 @@
           <option value="€">€</option>
         </select>
       </div>
-
       <div>
         <label>Forma de Pago:</label>
         <select name="Forma_Pago" required>
@@ -160,31 +155,61 @@
   </form>
 </div>
 
-<!-- Modal para Nuevo Proveedor -->
+<!-- Modal Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" method="POST" action="/nuevo_proveedor">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalProveedorLabel">➕ Nuevo Proveedor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title">➕ Nuevo Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="NombreProveedor" class="form-label">Nombre del Proveedor</label>
+          <label class="form-label">Nombre del Proveedor</label>
           <input type="text" class="form-control" name="NombreProveedor" required>
         </div>
         <div class="mb-3">
-          <label for="ContactoProveedor" class="form-label">Contacto</label>
+          <label class="form-label">Contacto</label>
           <input type="text" class="form-control" name="ContactoProveedor">
         </div>
         <div class="mb-3">
-          <label for="TelefonoProveedor" class="form-label">Teléfono</label>
+          <label class="form-label">Teléfono</label>
           <input type="text" class="form-control" name="TelefonoProveedor">
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="submit" class="btn btn-success">Guardar Proveedor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" method="POST" action="/nuevo_producto">
+      <div class="modal-header">
+        <h5 class="modal-title">➕ Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre del Producto</label>
+          <input type="text" class="form-control" name="NombreProducto" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Categoría</label>
+          <input type="text" class="form-control" name="CategoriaProducto">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Unidad</label>
+          <input type="text" class="form-control" name="UnidadProducto">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar Producto</button>
       </div>
     </form>
   </div>
