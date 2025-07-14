@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from config_loader import cargar_configuracion
 import pandas as pd
 import requests
@@ -6,6 +6,7 @@ import os
 import csv
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'clave-secreta'
 
 # Crear carpeta /data si no existe
 os.makedirs("data", exist_ok=True)
@@ -69,9 +70,21 @@ def compras():
 
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
+    archivo = 'data/proveedores.csv'
+    proveedores_existentes = []
+
+    # Leer proveedores actuales
+    if os.path.exists(archivo):
+        try:
+            df = pd.read_csv(archivo)
+            proveedores_existentes = df['Nombre'].dropna().tolist()
+        except:
+            pass
+
     if request.method == 'POST':
+        nombre_nuevo = request.form['Nombre'].strip().lower()
         datos = {
-            'Nombre': request.form['Nombre'],
+            'Nombre': request.form['Nombre'].strip(),
             'Teléfono': request.form['Telefono'],
             'Email': request.form['Email'],
             'Contacto': request.form['Contacto'],
@@ -80,14 +93,23 @@ def proveedores():
             'Observaciones': request.form['Observaciones']
         }
 
-        archivo = 'data/proveedores.csv'
-        escribir_encabezado = not os.path.exists(archivo)
+        # Buscar coincidencias parciales
+        duplicado = False
+        for nombre_existente in proveedores_existentes:
+            if nombre_nuevo in nombre_existente.lower() or nombre_existente.lower() in nombre_nuevo:
+                duplicado = True
+                break
 
-        with open(archivo, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=datos.keys())
-            if escribir_encabezado:
-                writer.writeheader()
-            writer.writerow(datos)
+        if duplicado:
+            flash("⚠️ Ya existe un proveedor con un nombre similar. Revisa antes de guardar.")
+        else:
+            escribir_encabezado = not os.path.exists(archivo)
+            with open(archivo, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=datos.keys())
+                if escribir_encabezado:
+                    writer.writeheader()
+                writer.writerow(datos)
+            flash("✅ Proveedor registrado correctamente.")
 
         return redirect('/proveedores')
 
@@ -126,8 +148,3 @@ def productos():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
