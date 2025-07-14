@@ -65,61 +65,24 @@
     cursor: pointer;
   }
 
-  .mensaje-exito {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border: 1px solid #badbcc;
-    padding: 10px;
-    margin-bottom: 10px;
+  .btn-mas {
+    padding: 6px 10px;
+    background-color: #198754;
+    border: none;
     border-radius: 4px;
+    color: white;
+    font-size: 18px;
+    margin-left: 6px;
   }
 
-  .mensaje-alerta {
-    background-color: #fff3cd;
-    color: #664d03;
-    border: 1px solid #ffecb5;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-  }
-
-  .mensaje-error {
-    background-color: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-  }
-
-  .grupo-proveedor {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .grupo-proveedor button span {
-    color: white !important;
+  .btn-mas:hover {
+    opacity: 0.9;
+    cursor: pointer;
   }
 </style>
 
 <div class="formulario">
   <h2 style="text-align: center; margin-bottom: 20px;">🧾 Registrar Compra</h2>
-
-  <!-- Mensajes -->
-  {% with mensajes = get_flashed_messages() %}
-    {% if mensajes %}
-      {% for msg in mensajes %}
-        {% if "✅" in msg %}
-          <div class="mensaje-exito">{{ msg }}</div>
-        {% elif "⚠️" in msg %}
-          <div class="mensaje-alerta">{{ msg }}</div>
-        {% elif "❌" in msg %}
-          <div class="mensaje-error">{{ msg }}</div>
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
 
   <form method="POST">
     <div class="fila-doble">
@@ -137,16 +100,14 @@
     <div class="fila-doble">
       <div>
         <label>Proveedor:</label>
-        <div class="grupo-proveedor">
-          <select name="Proveedor" class="form-select" style="flex: 1;" required>
+        <div style="display: flex; align-items: center;">
+          <select name="Proveedor" required style="flex: 1;">
             <option value="">Seleccione...</option>
             {% for p in proveedores %}
               <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
             {% endfor %}
           </select>
-          <button type="button" class="btn btn-primary" style="padding: 5px 12px;" data-bs-toggle="modal" data-bs-target="#modalProveedor">
-            <span>➕</span>
-          </button>
+          <button type="button" class="btn-mas" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
         </div>
       </div>
 
@@ -237,4 +198,5 @@
   </div>
 </div>
 {% endblock %}
+
 
