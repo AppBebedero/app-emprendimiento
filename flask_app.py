@@ -92,36 +92,36 @@ def nuevo_proveedor():
     contacto = request.form['ContactoProveedor'].strip()
     telefono = request.form['TelefonoProveedor'].strip()
 
+    # ✅ Descargar CSV actualizado antes de validar duplicados
+    descargar_csv(url_csv, archivo_local)
+
     existentes = []
-    if os.path.exists(archivo_local):
-        try:
-            df = pd.read_csv(archivo_local)
-            existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
-        except: pass
+    try:
+        df = pd.read_csv(archivo_local)
+        existentes = [p.strip().lower() for p in df['Nombre'].dropna().tolist()]
+    except: pass
 
     if nombre.lower() in existentes:
         flash("⚠️ Ya existe un proveedor con ese nombre.")
-        return redirect('/compras')  # ← LÍNEA CLAVE QUE DETIENE EL DUPLICADO
-
-    datos = {
-        'tipo': 'proveedor',
-        'Nombre': nombre,
-        'Teléfono': telefono,
-        'Email': '',
-        'Contacto': contacto,
-        'Celular': '',
-        'Tipo': '',
-        'Observaciones': ''
-    }
-
-    try:
-        requests.post(url_script, json=datos)
-        flash("✅ Proveedor agregado correctamente.")
-        descargar_csv(url_csv, archivo_local)
-        print("📝 Proveedores actuales:", pd.read_csv(archivo_local)['Nombre'].tolist())
-    except Exception as e:
-        flash("❌ Error al guardar el proveedor.")
-        print("Error en nuevo_proveedor:", e)
+        return redirect('/compras')
+    else:
+        datos = {
+            'tipo': 'proveedor',
+            'Nombre': nombre,
+            'Teléfono': telefono,
+            'Email': '',
+            'Contacto': contacto,
+            'Celular': '',
+            'Tipo': '',
+            'Observaciones': ''
+        }
+        try:
+            requests.post(url_script, json=datos)
+            flash("✅ Proveedor agregado correctamente.")
+            descargar_csv(url_csv, archivo_local)
+        except Exception as e:
+            flash("❌ Error al guardar el proveedor.")
+            print("Error en nuevo_proveedor:", e)
 
     return redirect(f"/compras?seleccionado={nombre}")
 
