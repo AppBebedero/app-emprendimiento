@@ -64,6 +64,26 @@
     opacity: 0.9;
     cursor: pointer;
   }
+
+  .input-con-boton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-mas {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+  }
+
+  .btn-mas:hover {
+    background-color: #0b5ed7;
+    cursor: pointer;
+  }
 </style>
 
 <div class="formulario">
@@ -85,12 +105,15 @@
     <div class="fila-doble">
       <div>
         <label>Proveedor:</label>
-        <select name="Proveedor" required>
-          <option value="">Seleccione...</option>
-          {% for p in proveedores %}
-            <option value="{{ p }}">{{ p }}</option>
-          {% endfor %}
-        </select>
+        <div class="input-con-boton">
+          <select name="Proveedor" required>
+            <option value="">Seleccione...</option>
+            {% for p in proveedores %}
+              <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" class="btn-mas" data-bs-toggle="modal" data-bs-target="#modalProveedor">➕</button>
+        </div>
       </div>
 
       <div>
@@ -149,11 +172,34 @@
     </div>
   </form>
 </div>
+
+<!-- Modal Nuevo Proveedor -->
+<div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" method="POST" action="/nuevo_proveedor">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalProveedorLabel">➕ Nuevo Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="NombreProveedor" class="form-label">Nombre del Proveedor</label>
+          <input type="text" class="form-control" name="NombreProveedor" required>
+        </div>
+        <div class="mb-3">
+          <label for="ContactoProveedor" class="form-label">Contacto</label>
+          <input type="text" class="form-control" name="ContactoProveedor">
+        </div>
+        <div class="mb-3">
+          <label for="TelefonoProveedor" class="form-label">Teléfono</label>
+          <input type="text" class="form-control" name="TelefonoProveedor">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar Proveedor</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
-
-
-
-
-
-
-
