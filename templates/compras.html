@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <div class="mb-3 position-relative">
+      <div class="mb-3">
         <label>Proveedor:</label>
         <div class="input-group">
           <select name="Proveedor" id="proveedor" class="form-select" required></select>
@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <div class="mb-3 position-relative">
+      <div class="mb-3">
         <label>Producto:</label>
         <div class="input-group">
           <select name="Producto" id="producto" class="form-select" required></select>
@@ -70,7 +70,8 @@
         <textarea name="Observaciones" class="form-control" rows="2"></textarea>
       </div>
 
-      <div class="text-center">
+      <div class="text-center mt-4">
+        <a href="/" class="btn btn-secondary me-2">Cancelar</a>
         <button type="submit" class="btn btn-primary px-4">Registrar Compra</button>
       </div>
     </form>
@@ -87,15 +88,34 @@
       </div>
       <form id="formProveedor">
         <div class="modal-body">
-          <div class="mb-2"><label>Nombre:</label><input name="nombre" class="form-control" required></div>
-          <div class="mb-2"><label>Teléfono:</label><input name="telefono" class="form-control"></div>
-          <div class="mb-2"><label>Email:</label><input name="email" class="form-control"></div>
-          <div class="mb-2"><label>Contacto:</label><input name="contacto" class="form-control"></div>
-          <div class="mb-2"><label>Celular:</label><input name="celular" class="form-control"></div>
-          <div class="mb-2"><label>Tipo de Negocio:</label>
-            <select name="tipo_negocio" class="form-select" id="tipo_negocio"></select>
+          <div class="mb-2">
+            <label><i class="bi bi-person-badge me-1"></i>Nombre:</label>
+            <input name="nombre" class="form-control" required>
           </div>
-          <div class="mb-2"><label>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
+          <div class="mb-2">
+            <label>Teléfono:</label>
+            <input name="telefono" class="form-control" id="telefono">
+          </div>
+          <div class="mb-2">
+            <label>Email:</label>
+            <input name="email" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label>Contacto:</label>
+            <input name="contacto" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label>Celular:</label>
+            <input name="celular" class="form-control" id="celular">
+          </div>
+          <div class="mb-2">
+            <label>Tipo de Negocio:</label>
+            <select name="tipo_negocio" class="form-select" id="tipo_negocio" required></select>
+          </div>
+          <div class="mb-2">
+            <label>Observaciones:</label>
+            <textarea name="observaciones" class="form-control"></textarea>
+          </div>
           <div id="errorProveedor" class="text-danger small mt-2"></div>
         </div>
         <div class="modal-footer">
@@ -117,17 +137,26 @@
       </div>
       <form id="formProducto">
         <div class="modal-body">
-          <div class="mb-2"><label>Nombre:</label><input name="nombre" class="form-control" required></div>
-          <div class="mb-2"><label>Proveedor:</label>
-            <select name="proveedor" class="form-select" id="producto_proveedor"></select>
+          <div class="mb-2">
+            <label><i class="bi bi-box-seam me-1"></i>Nombre:</label>
+            <input name="nombre" class="form-control" required>
           </div>
-          <div class="mb-2"><label>Categoría:</label>
-            <select name="categoria" class="form-select" id="categoria"></select>
+          <div class="mb-2">
+            <label>Proveedor:</label>
+            <select name="proveedor" class="form-select" id="producto_proveedor" required></select>
           </div>
-          <div class="mb-2"><label>Unidad:</label>
-            <select name="unidad" class="form-select" id="unidad"></select>
+          <div class="mb-2">
+            <label>Categoría:</label>
+            <select name="categoria" class="form-select" id="categoria" required></select>
           </div>
-          <div class="mb-2"><label>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
+          <div class="mb-2">
+            <label>Unidad:</label>
+            <select name="unidad" class="form-select" id="unidad" required></select>
+          </div>
+          <div class="mb-2">
+            <label>Observaciones:</label>
+            <textarea name="observaciones" class="form-control"></textarea>
+          </div>
           <div id="errorProducto" class="text-danger small mt-2"></div>
         </div>
         <div class="modal-footer">
@@ -138,6 +167,10 @@
     </div>
   </div>
 </div>
+
+<!-- Inputmask y scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
 
 <script>
 function abrirModalProveedor() {
@@ -163,20 +196,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Productos
-  const productoSelect = document.getElementById('producto');
-  productoSelect.innerHTML = datos.productos.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
+  document.getElementById('producto').innerHTML =
+    datos.productos.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
+
+  // Tipo de Negocio
+  document.getElementById('tipo_negocio').innerHTML =
+    datos.tipos_negocio.map(t => `<option value="${t}">${t}</option>`).join('');
 
   // Categorías
-  const categoriaSelect = document.getElementById('categoria');
-  categoriaSelect.innerHTML = datos.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('categoria').innerHTML =
+    datos.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
 
   // Unidades
-  const unidadSelect = document.getElementById('unidad');
-  unidadSelect.innerHTML = datos.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
+  document.getElementById('unidad').innerHTML =
+    datos.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
 
-  // Tipo de negocio
-  const tipoNegocio = document.getElementById('tipo_negocio');
-  tipoNegocio.innerHTML = ['Suministros', 'Oficina', 'Librería', 'Otros'].map(t => `<option value="${t}">${t}</option>`).join('');
+  // Máscaras para teléfono y celular
+  $('#telefono').inputmask('9999-9999');
+  $('#celular').inputmask('9999-9999');
 });
 
 document.getElementById('formProveedor').addEventListener('submit', async e => {
@@ -190,7 +227,6 @@ document.getElementById('formProveedor').addEventListener('submit', async e => {
       method: 'POST',
       body: data
     });
-
     const result = await res.json();
     if (res.ok) {
       const nuevo = data.get('nombre');
@@ -217,7 +253,6 @@ document.getElementById('formProducto').addEventListener('submit', async e => {
       method: 'POST',
       body: data
     });
-
     const result = await res.json();
     if (res.ok) {
       const nuevo = data.get('nombre');
