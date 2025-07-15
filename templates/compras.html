@@ -4,95 +4,95 @@
 {% block content %}
 <div class="container mt-4 mb-5">
   <div class="card shadow p-4">
-    <h2 class="mb-4 text-center">🛒 Registrar Compra</h2>
+    <h2 class="mb-4 text-center">🛒 Registro de Compras</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-info">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     <form method="POST" action="/compras">
-      <div class="row mb-3">
-        <div class="col-md-6">
+      <div class="row">
+        <div class="col-md-4 mb-3">
           <label>Fecha:</label>
           <input type="date" name="Fecha" class="form-control" required>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4 mb-3">
           <label>N° Documento:</label>
           <input type="text" name="N_Documento" class="form-control" required>
         </div>
+        <div class="col-md-4 mb-3">
+          <label>Forma de Pago:</label>
+          <select name="Forma_Pago" class="form-control" required>
+            {% for f in formas_pago %}
+              <option value="{{ f }}">{{ f }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label>Proveedor:</label>
-        <div class="input-group">
-          <select name="Proveedor" class="form-select" required>
+        <div class="d-flex">
+          <select name="Proveedor" class="form-control me-2" required>
             <option value="">Seleccione un proveedor</option>
-            {% for prov in proveedores %}
-              <option value="{{ prov }}" {% if prov == seleccionado %}selected{% endif %}>{{ prov }}</option>
+            {% for p in proveedores %}
+              <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
             {% endfor %}
           </select>
-          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalProveedor" title="Agregar nuevo proveedor">+</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
         </div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label>Producto:</label>
-        <div class="input-group">
-          <select name="Producto" class="form-select" required>
+        <div class="d-flex">
+          <select name="Producto" class="form-control me-2" required>
             <option value="">Seleccione un producto</option>
-            {% for prod in productos %}
-              <option value="{{ prod }}" {% if prod == producto_seleccionado %}selected{% endif %}>{{ prod }}</option>
+            {% for p in productos %}
+              <option value="{{ p }}" {% if p == producto_seleccionado %}selected{% endif %}>{{ p }}</option>
             {% endfor %}
           </select>
-          <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalProducto" title="Agregar nuevo producto">+</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
         </div>
       </div>
 
-      <div class="row mb-3">
-        <div class="col-md-4">
+      <div class="row">
+        <div class="col-md-3 mb-3">
           <label>Cantidad:</label>
-          <input type="number" name="Cantidad" class="form-control" step="0.01" required>
+          <input type="number" step="any" name="Cantidad" class="form-control" required>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3 mb-3">
           <label>Precio Unitario:</label>
-          <input type="number" name="PrecioUnitario" class="form-control" step="0.01" required>
+          <input type="number" step="any" name="PrecioUnitario" class="form-control" required>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3 mb-3">
           <label>Moneda:</label>
-          <select name="Moneda" class="form-select" required>
-            <option value="₡">₡</option>
-            <option value="$">$</option>
+          <select name="Moneda" class="form-control" required>
+            {% for m in monedas %}
+              <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
           </select>
         </div>
-      </div>
-
-      <div class="mb-3">
-        <label>Forma de Pago:</label>
-        <select name="Forma_Pago" class="form-select" required>
-          <option value="">Seleccione una forma</option>
-          <option>Efectivo</option>
-          <option>SINPE</option>
-          <option>Tarjeta Cr.</option>
-        </select>
       </div>
 
       <div class="mb-3">
         <label>Observaciones:</label>
-        <textarea name="Observaciones" class="form-control"></textarea>
+        <textarea name="Observaciones" class="form-control" rows="3"></textarea>
       </div>
 
       <div class="text-center">
-        <button class="btn btn-primary">💾 Guardar Compra</button>
+        <button type="submit" class="btn btn-primary px-5">Registrar Compra</button>
       </div>
     </form>
-
-    {% with mensajes = get_flashed_messages() %}
-      {% if mensajes %}
-        <div class="alert alert-info mt-3">
-          {{ mensajes[0] }}
-        </div>
-      {% endif %}
-    {% endwith %}
   </div>
 </div>
 
 <!-- Modal Proveedor -->
-<div class="modal fade" id="modalProveedor" tabindex="-1">
+<div class="modal fade" id="modalProveedor" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="/nuevo_proveedor" class="modal-content">
       <div class="modal-header">
@@ -100,29 +100,37 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <label>Nombre:</label>
-        <input type="text" name="NombreProveedor" class="form-control mb-2" required>
-        <label>Contacto:</label>
-        <input type="text" name="ContactoProveedor" class="form-control mb-2">
-        <label>Teléfono:</label>
-        <input type="text" name="TelefonoProveedor" class="form-control mb-2">
-        <label>Tipo de Negocio:</label>
-        <select name="TipoNegocioProveedor" class="form-select">
-          {% for tipo in leer_csv_simple('data/tipo_negocio.csv') %}
-            <option>{{ tipo }}</option>
-          {% endfor %}
-        </select>
+        <div class="mb-2">
+          <label>Nombre:</label>
+          <input type="text" name="NombreProveedor" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Teléfono:</label>
+          <input type="text" name="TelefonoProveedor" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label>Contacto:</label>
+          <input type="text" name="ContactoProveedor" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label>Tipo de Negocio:</label>
+          <select name="TipoProveedor" class="form-control">
+            {% for t in cargar_lista_desde_csv('data/tipo_negocio.csv') %}
+              <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-success">Guardar</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal Producto -->
-<div class="modal fade" id="modalProducto" tabindex="-1">
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="/nuevo_producto" class="modal-content">
       <div class="modal-header">
@@ -130,27 +138,32 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <label>Nombre:</label>
-        <input type="text" name="NombreProducto" class="form-control mb-2" required>
-        <label>Categoría:</label>
-        <select name="CategoriaProducto" class="form-select mb-2">
-          {% for cat in leer_csv_simple('data/categorias.csv') %}
-            <option>{{ cat }}</option>
-          {% endfor %}
-        </select>
-        <label>Unidad:</label>
-        <select name="UnidadProducto" class="form-select">
-          {% for un in leer_csv_simple('data/unidades.csv') %}
-            <option>{{ un }}</option>
-          {% endfor %}
-        </select>
+        <div class="mb-2">
+          <label>Nombre:</label>
+          <input type="text" name="NombreProducto" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Categoría:</label>
+          <select name="CategoriaProducto" class="form-control">
+            {% for c in cargar_lista_desde_csv('data/categorias.csv') %}
+              <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label>Unidad:</label>
+          <select name="UnidadProducto" class="form-control">
+            {% for u in cargar_lista_desde_csv('data/unidades.csv') %}
+              <option value="{{ u }}">{{ u }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-success">Guardar</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>
   </div>
 </div>
-
 {% endblock %}
