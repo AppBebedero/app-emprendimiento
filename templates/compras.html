@@ -1,229 +1,156 @@
 {% extends "base.html" %}
-{% block title %}Registrar Compra{% endblock %}
+{% block title %}Registro de Compras{% endblock %}
+
 {% block content %}
-<style>
-  .formulario {
-    max-width: 700px;
-    margin: auto;
-    padding: 20px;
-  }
+<div class="container mt-4 mb-5">
+  <div class="card shadow p-4">
+    <h2 class="mb-4 text-center">🛒 Registrar Compra</h2>
+    <form method="POST" action="/compras">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Fecha:</label>
+          <input type="date" name="Fecha" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>N° Documento:</label>
+          <input type="text" name="N_Documento" class="form-control" required>
+        </div>
+      </div>
 
-  .formulario label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: bold;
-    text-align: left;
-  }
-
-  .formulario input,
-  .formulario select,
-  .formulario textarea {
-    width: 100%;
-    padding: 6px;
-    margin-bottom: 15px;
-    text-align: right;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-
-  .inline-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-agregar {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #007bff;
-    padding: 0;
-    margin-top: -8px;
-    cursor: pointer;
-  }
-
-  .fila-doble {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .fila-doble > div {
-    flex: 1 1 45%;
-  }
-
-  .botones {
-    text-align: center;
-    margin-top: 25px;
-  }
-
-  .btn-cancelar {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    margin-right: 15px;
-    text-decoration: none;
-  }
-
-  .btn-guardar {
-    background-color: #198754;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-  }
-
-  .btn-cancelar:hover,
-  .btn-guardar:hover {
-    opacity: 0.9;
-    cursor: pointer;
-  }
-</style>
-
-<div class="formulario">
-  <h2 style="text-align: center; margin-bottom: 20px;">🧾 Registrar Compra</h2>
-
-  <form method="POST">
-    <div class="inline-btn">
-      <div style="flex-grow: 1;">
+      <div class="mb-3">
         <label>Proveedor:</label>
-        <select name="Proveedor" required>
-          <option value="">Seleccione...</option>
-          {% for p in proveedores %}
-            <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
-          {% endfor %}
-        </select>
+        <div class="input-group">
+          <select name="Proveedor" class="form-select" required>
+            <option value="">Seleccione un proveedor</option>
+            {% for prov in proveedores %}
+              <option value="{{ prov }}" {% if prov == seleccionado %}selected{% endif %}>{{ prov }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalProveedor" title="Agregar nuevo proveedor">+</button>
+        </div>
       </div>
-      <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
-    </div>
 
-    <div class="inline-btn">
-      <div style="flex-grow: 1;">
+      <div class="mb-3">
         <label>Producto:</label>
-        <select name="Producto" required>
-          <option value="">Seleccione...</option>
-          {% for p in productos %}
-            <option value="{{ p }}" {% if p == producto_seleccionado %}selected{% endif %}>{{ p }}</option>
+        <div class="input-group">
+          <select name="Producto" class="form-select" required>
+            <option value="">Seleccione un producto</option>
+            {% for prod in productos %}
+              <option value="{{ prod }}" {% if prod == producto_seleccionado %}selected{% endif %}>{{ prod }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalProducto" title="Agregar nuevo producto">+</button>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label>Cantidad:</label>
+          <input type="number" name="Cantidad" class="form-control" step="0.01" required>
+        </div>
+        <div class="col-md-4">
+          <label>Precio Unitario:</label>
+          <input type="number" name="PrecioUnitario" class="form-control" step="0.01" required>
+        </div>
+        <div class="col-md-4">
+          <label>Moneda:</label>
+          <select name="Moneda" class="form-select" required>
+            <option value="₡">₡</option>
+            <option value="$">$</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Forma de Pago:</label>
+        <select name="Forma_Pago" class="form-select" required>
+          <option value="">Seleccione una forma</option>
+          <option>Efectivo</option>
+          <option>SINPE</option>
+          <option>Tarjeta Cr.</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>Observaciones:</label>
+        <textarea name="Observaciones" class="form-control"></textarea>
+      </div>
+
+      <div class="text-center">
+        <button class="btn btn-primary">💾 Guardar Compra</button>
+      </div>
+    </form>
+
+    {% with mensajes = get_flashed_messages() %}
+      {% if mensajes %}
+        <div class="alert alert-info mt-3">
+          {{ mensajes[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+</div>
+
+<!-- Modal Proveedor -->
+<div class="modal fade" id="modalProveedor" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="/nuevo_proveedor" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">➕ Nuevo Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label>Nombre:</label>
+        <input type="text" name="NombreProveedor" class="form-control mb-2" required>
+        <label>Contacto:</label>
+        <input type="text" name="ContactoProveedor" class="form-control mb-2">
+        <label>Teléfono:</label>
+        <input type="text" name="TelefonoProveedor" class="form-control mb-2">
+        <label>Tipo de Negocio:</label>
+        <select name="TipoNegocioProveedor" class="form-select">
+          {% for tipo in leer_csv_simple('data/tipo_negocio.csv') %}
+            <option>{{ tipo }}</option>
           {% endfor %}
         </select>
       </div>
-      <button type="button" class="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
-    </div>
-
-    <div class="fila-doble">
-      <div>
-        <label>Cantidad:</label>
-        <input type="number" name="Cantidad" step="any" required>
-      </div>
-
-      <div>
-        <label>Precio Unitario:</label>
-        <input type="number" name="PrecioUnitario" step="any" required>
-      </div>
-    </div>
-
-    <div class="fila-doble">
-      <div>
-        <label>Moneda:</label>
-        <select name="Moneda" required>
-          <option value="">Seleccione...</option>
-          <option value="₡">₡</option>
-          <option value="$">$</option>
-          <option value="€">€</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Forma de Pago:</label>
-        <select name="Forma_Pago" required>
-          <option value="">Seleccione...</option>
-          <option value="Efectivo">Efectivo</option>
-          <option value="SINPE">SINPE</option>
-          <option value="Tarjeta Cr.">Tarjeta Cr.</option>
-        </select>
-      </div>
-    </div>
-
-    <div>
-      <label>Observaciones:</label>
-      <textarea name="Observaciones" rows="2"></textarea>
-    </div>
-
-    <div class="botones">
-      <a href="/" class="btn-cancelar">Cancelar</a>
-      <button type="submit" class="btn-guardar">Guardar</button>
-    </div>
-  </form>
-</div>
-
-<!-- Modal Nuevo Proveedor -->
-<div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="/nuevo_proveedor">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalProveedorLabel">➕ Nuevo Proveedor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <label>Nombre:</label>
-          <input type="text" name="NombreProveedor" required>
-          <label>Contacto:</label>
-          <input type="text" name="ContactoProveedor">
-          <label>Teléfono:</label>
-          <input type="text" name="TelefonoProveedor">
-          <label>Tipo de Negocio:</label>
-          <select name="TipoProveedor" required>
-            <option value="">Seleccione...</option>
-            {% for tipo in tipos_negocio %}
-              <option value="{{ tipo }}">{{ tipo }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar</button>
-        </div>
+      <div class="modal-footer">
+        <button class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Modal Nuevo Producto -->
-<div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
+<!-- Modal Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1">
   <div class="modal-dialog">
-    <form method="POST" action="/nuevo_producto">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalProductoLabel">➕ Nuevo Producto</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <label>Nombre:</label>
-          <input type="text" name="NombreProducto" required>
-          <label>Categoría:</label>
-          <select name="CategoriaProducto" required>
-            <option value="">Seleccione...</option>
-            {% for cat in categorias %}
-              <option value="{{ cat }}">{{ cat }}</option>
-            {% endfor %}
-          </select>
-          <label>Unidad:</label>
-          <select name="UnidadProducto" required>
-            <option value="">Seleccione...</option>
-            {% for un in unidades %}
-              <option value="{{ un }}">{{ un }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar</button>
-        </div>
+    <form method="POST" action="/nuevo_producto" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">➕ Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label>Nombre:</label>
+        <input type="text" name="NombreProducto" class="form-control mb-2" required>
+        <label>Categoría:</label>
+        <select name="CategoriaProducto" class="form-select mb-2">
+          {% for cat in leer_csv_simple('data/categorias.csv') %}
+            <option>{{ cat }}</option>
+          {% endfor %}
+        </select>
+        <label>Unidad:</label>
+        <select name="UnidadProducto" class="form-select">
+          {% for un in leer_csv_simple('data/unidades.csv') %}
+            <option>{{ un }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
 </div>
+
 {% endblock %}
