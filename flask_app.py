@@ -11,27 +11,42 @@ app.config['SECRET_KEY'] = 'clave-secreta'
 # Crear carpeta /data si no existe
 os.makedirs("data", exist_ok=True)
 
-def leer_csv_simple(ruta):
+# --- Utilidad para cargar listas desde CSV ---
+def cargar_lista_desde_csv(ruta):
     try:
         df = pd.read_csv(ruta)
-        return df['Opción'].dropna().tolist()
+        return df.iloc[:, 0].dropna().tolist()
     except:
         return []
+
+# --- Utilidad para guardar datos nuevos en CSV ---
+def guardar_en_csv(nombre_archivo, encabezados, datos):
+    existe = os.path.exists(nombre_archivo)
+    with open(nombre_archivo, 'a', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=encabezados)
+        if not existe:
+            writer.writeheader()
+        writer.writerow(datos)
 
 @app.route('/')
 def inicio():
     config = cargar_configuracion()
     return render_template('inicio.html', config=config)
 
-@app.route('/configuracion', methods=['GET', 'POST'])
-def configuracion():
-    config = cargar_configuracion()
-    return render_template('configuracion.html', config=config)
-
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
     config = cargar_configuracion()
     url_script = config.get('URLScript', '')
+
+    # Precarga desde CSV local
+    proveedores = cargar_lista_desde_csv('data/proveedores.csv')
+    productos = cargar_lista_desde_csv('data/productos.csv')
+    formas_pago = ['Efectivo', 'SINPE', 'Tarjeta Cr.']
+    monedas = ['CRC', 'USD']
+
+    # Parámetros seleccionados si vienen de los formularios modales
+    seleccionado = request.args.get('seleccionado', '')
+    producto_seleccionado = request.args.get('producto', '')
 
     if request.method == 'POST':
         datos = {
@@ -49,107 +64,68 @@ def compras():
         }
         try:
             requests.post(url_script, json=datos)
-            flash("✅ Compra guardada correctamente.")
+            flash("✅ Compra registrada correctamente.")
         except Exception as e:
             flash("❌ Error al guardar la compra.")
             print("Error compras:", e)
         return redirect('/compras')
 
-    proveedores = leer_csv_simple('data/proveedores.csv')
-    productos = leer_csv_simple('data/productos.csv')
-
-    seleccionado_proveedor = request.args.get("seleccionado", "")
-    seleccionado_producto = request.args.get("producto", "")
-
     return render_template('compras.html',
-                           config=config,
                            proveedores=proveedores,
                            productos=productos,
-                           seleccionado=seleccionado_proveedor,
-                           producto_seleccionado=seleccionado_producto)
+                           formas_pago=formas_pago,
+                           monedas=monedas,
+                           seleccionado=seleccionado,
+                           producto_seleccionado=producto_seleccionado)
 
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
-    config = cargar_configuracion()
-    url_script = config.get('URLScriptProveedores', '')
-
     nombre = request.form['NombreProveedor'].strip()
-    contacto = request.form['ContactoProveedor'].strip()
     telefono = request.form['TelefonoProveedor'].strip()
-    tipo = request.form['TipoNegocioProveedor'].strip()
+    contacto = request.form['ContactoProveedor'].strip()
+    tipo = request.form['TipoProveedor'].strip()
 
-    archivo_local = 'data/proveedores.csv'
-    existentes = []
-    if os.path.exists(archivo_local):
-        try:
-            df = pd.read_csv(archivo_local)
-            existentes = [p.strip().lower() for p in df['Opción'].dropna().tolist()]
-        except: pass
-
-    if nombre.lower() in existentes:
+    existentes = cargar_lista_desde_csv('data/proveedores.csv')
+    if nombre.lower() in [p.lower() for p in existentes]:
         flash("⚠️ Ya existe un proveedor con ese nombre.")
     else:
         datos = {
-            'tipo': 'proveedor',
             'Nombre': nombre,
             'Teléfono': telefono,
             'Email': '',
             'Contacto': contacto,
             'Celular': '',
-            'Tipo': tipo,
+            'Tipo de Negocio': tipo,
             'Observaciones': ''
         }
-        try:
-            requests.post(url_script, json=datos)
-            flash("✅ Proveedor agregado correctamente.")
-            with open(archivo_local, 'a', encoding='utf-8', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([nombre])
-        except Exception as e:
-            flash("❌ Error al guardar el proveedor.")
-            print("Error en nuevo_proveedor:", e)
-
-    return redirect(f"/compras?seleccionado={nombre}")
+        guardar_en_csv('data/proveedores.csv',
+                       ['Nombre', 'Teléfono', 'Email', 'Contacto', 'Celular', 'Tipo de Negocio', 'Observaciones'],
+                       datos)
+        flash("✅ Proveedor agregado correctamente.")
+    return redirect(f'/compras?seleccionado={nombre}')
 
 @app.route('/nuevo_producto', methods=['POST'])
 def nuevo_producto():
-    config = cargar_configuracion()
-    url_script = config.get('URLScriptProductos', '')
-
     nombre = request.form['NombreProducto'].strip()
     categoria = request.form['CategoriaProducto'].strip()
     unidad = request.form['UnidadProducto'].strip()
 
-    archivo_local = 'data/productos.csv'
-    existentes = []
-    if os.path.exists(archivo_local):
-        try:
-            df = pd.read_csv(archivo_local)
-            existentes = [p.strip().lower() for p in df['Opción'].dropna().tolist()]
-        except: pass
-
-    if nombre.lower() in existentes:
+    existentes = cargar_lista_desde_csv('data/productos.csv')
+    if nombre.lower() in [p.lower() for p in existentes]:
         flash("⚠️ Ya existe un producto con ese nombre.")
     else:
         datos = {
-            'tipo': 'producto',
             'Nombre': nombre,
             'Categoría': categoria,
             'Unidad': unidad,
             'Proveedor': '',
             'Observaciones': ''
         }
-        try:
-            requests.post(url_script, json=datos)
-            flash("✅ Producto agregado correctamente.")
-            with open(archivo_local, 'a', encoding='utf-8', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([nombre])
-        except Exception as e:
-            flash("❌ Error al guardar el producto.")
-            print("Error en nuevo_producto:", e)
-
-    return redirect(f"/compras?producto={nombre}")
+        guardar_en_csv('data/productos.csv',
+                       ['Nombre', 'Categoría', 'Unidad', 'Proveedor', 'Observaciones'],
+                       datos)
+        flash("✅ Producto agregado correctamente.")
+    return redirect(f'/compras?producto={nombre}')
 
 if __name__ == '__main__':
     app.run(debug=True)
