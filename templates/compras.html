@@ -70,14 +70,15 @@
         <textarea name="Observaciones" class="form-control" rows="2"></textarea>
       </div>
 
-      <div class="text-center mt-4">
-        <a href="/" class="btn btn-danger me-2">
+      <div class="text-center d-flex justify-content-center gap-2 mt-4 flex-wrap">
+        <a href="/" class="btn btn-danger">
           <i class="bi bi-x-circle me-1"></i>Cancelar
         </a>
-        <button type="submit" class="btn btn-success px-4">
-          <i class="bi bi-check-circle me-1"></i>Registrar
+        <button type="submit" class="btn btn-success px-4" id="btnGuardarCompra">
+          <i class="bi bi-check-circle me-1"></i>Guardar
         </button>
       </div>
+      <div id="mensajeCompra" class="text-center mt-3"></div>
     </form>
   </div>
 </div>
@@ -91,48 +92,26 @@
       </div>
       <form id="formProveedor">
         <div class="modal-body">
-          <div class="mb-2">
-            <label><i class="bi bi-person-fill me-1"></i>Nombre:</label>
-            <input name="nombre" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-telephone me-1"></i>Teléfono:</label>
-            <input name="telefono" id="telefono" class="form-control">
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-envelope me-1"></i>Email:</label>
-            <input name="email" class="form-control">
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-person-lines-fill me-1"></i>Contacto:</label>
-            <input name="contacto" class="form-control">
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-phone me-1"></i>Celular:</label>
-            <input name="celular" id="celular" class="form-control">
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-briefcase me-1"></i>Tipo de Negocio:</label>
+          <div class="mb-2"><label><i class="bi bi-person-fill me-1"></i>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label><i class="bi bi-telephone me-1"></i>Teléfono:</label><input name="telefono" id="telefono" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-envelope me-1"></i>Email:</label><input name="email" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-person-lines-fill me-1"></i>Contacto:</label><input name="contacto" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-phone me-1"></i>Celular:</label><input name="celular" id="celular" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-briefcase me-1"></i>Tipo de Negocio:</label>
             <select name="tipo_negocio" class="form-select" id="tipo_negocio" required></select>
           </div>
-          <div class="mb-2">
-            <label><i class="bi bi-chat-left-dots me-1"></i>Observaciones:</label>
-            <textarea name="observaciones" class="form-control"></textarea>
-          </div>
+          <div class="mb-2"><label><i class="bi bi-chat-left-dots me-1"></i>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
           <div id="errorProveedor" class="text-danger small mt-2"></div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-danger" data-bs-dismiss="modal">
-            <i class="bi bi-x-circle me-1"></i>Cancelar
-          </button>
-          <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle me-1"></i>Guardar
-          </button>
+          <button class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+          <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Guardar</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
 <!-- Modal Producto -->
 <div class="modal fade" id="modalProducto" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -143,41 +122,29 @@
       </div>
       <form id="formProducto">
         <div class="modal-body">
-          <div class="mb-2">
-            <label><i class="bi bi-box me-1"></i>Nombre:</label>
-            <input name="nombre" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label><i class="bi bi-person-vcard me-1"></i>Proveedor:</label>
+          <div class="mb-2"><label><i class="bi bi-box me-1"></i>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label><i class="bi bi-person-vcard me-1"></i>Proveedor:</label>
             <select name="proveedor" class="form-select" id="producto_proveedor" required></select>
           </div>
-          <div class="mb-2">
-            <label><i class="bi bi-tags me-1"></i>Categoría:</label>
+          <div class="mb-2"><label><i class="bi bi-tags me-1"></i>Categoría:</label>
             <select name="categoria" class="form-select" id="categoria" required></select>
           </div>
-          <div class="mb-2">
-            <label><i class="bi bi-upc-scan me-1"></i>Unidad:</label>
+          <div class="mb-2"><label><i class="bi bi-upc-scan me-1"></i>Unidad:</label>
             <select name="unidad" class="form-select" id="unidad" required></select>
           </div>
-          <div class="mb-2">
-            <label><i class="bi bi-chat-left-text me-1"></i>Observaciones:</label>
+          <div class="mb-2"><label><i class="bi bi-chat-left-text me-1"></i>Observaciones:</label>
             <textarea name="observaciones" class="form-control"></textarea>
           </div>
           <div id="errorProducto" class="text-danger small mt-2"></div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-danger" data-bs-dismiss="modal">
-            <i class="bi bi-x-circle me-1"></i>Cancelar
-          </button>
-          <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle me-1"></i>Guardar
-          </button>
+          <button class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+          <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Guardar</button>
         </div>
       </form>
     </div>
   </div>
 </div>
-<!-- Librerías necesarias -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
 
@@ -225,11 +192,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#celular').inputmask('9999-9999');
 });
 
+// Envío de formulario principal
+document.getElementById('form-compras').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const mensaje = document.getElementById('mensajeCompra');
+  const btn = document.getElementById('btnGuardarCompra');
+
+  mensaje.innerHTML = '<span class="text-primary">Guardando...</span>';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/compras', {
+      method: 'POST',
+      body: data
+    });
+
+    if (res.ok) {
+      mensaje.innerHTML = '<span class="text-success">✅ Guardado correctamente</span>';
+      form.reset();
+    } else {
+      mensaje.innerHTML = '<span class="text-danger">❌ Error al guardar</span>';
+      console.error(await res.text());
+    }
+  } catch (err) {
+    mensaje.innerHTML = '<span class="text-danger">❌ Error de conexión</span>';
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Modal: Guardar nuevo proveedor
 document.getElementById('formProveedor').addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target;
   const data = new FormData(form);
   const error = document.getElementById('errorProveedor');
+
+  error.textContent = 'Guardando...';
 
   try {
     const res = await fetch('/nuevo_proveedor', {
@@ -237,6 +239,7 @@ document.getElementById('formProveedor').addEventListener('submit', async e => {
       body: data
     });
     const result = await res.json();
+
     if (res.ok) {
       const nuevo = data.get('nombre');
       const selects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
@@ -244,18 +247,22 @@ document.getElementById('formProveedor').addEventListener('submit', async e => {
       selects.forEach(s => s.value = nuevo);
       bootstrap.Modal.getInstance(document.getElementById('modalProveedor')).hide();
     } else {
-      error.textContent = result.error || 'Error al registrar';
+      error.textContent = result.error || '❌ Error al guardar';
     }
   } catch (err) {
-    error.textContent = 'Error al conectar con el servidor';
+    error.textContent = '❌ Error de conexión';
+    console.error(err);
   }
 });
 
+// Modal: Guardar nuevo producto
 document.getElementById('formProducto').addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target;
   const data = new FormData(form);
   const error = document.getElementById('errorProducto');
+
+  error.textContent = 'Guardando...';
 
   try {
     const res = await fetch('/nuevo_producto', {
@@ -263,6 +270,7 @@ document.getElementById('formProducto').addEventListener('submit', async e => {
       body: data
     });
     const result = await res.json();
+
     if (res.ok) {
       const nuevo = data.get('nombre');
       const select = document.getElementById('producto');
@@ -270,10 +278,11 @@ document.getElementById('formProducto').addEventListener('submit', async e => {
       select.value = nuevo;
       bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
     } else {
-      error.textContent = result.error || 'Error al registrar';
+      error.textContent = result.error || '❌ Error al guardar';
     }
   } catch (err) {
-    error.textContent = 'Error al conectar con el servidor';
+    error.textContent = '❌ Error de conexión';
+    console.error(err);
   }
 });
 </script>
