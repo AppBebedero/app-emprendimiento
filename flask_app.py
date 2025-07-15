@@ -1,33 +1,35 @@
-from flask import Flask, render_template, request, redirect, flash
-from config_loader import cargar_configuracion
-import pandas as pd
-import requests
-import os
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import csv
+import os
+import requests
+from config_loader import cargar_configuracion
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'clave-secreta'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Crear carpeta /data si no existe
-os.makedirs("data", exist_ok=True)
-
-# --- Utilidad para cargar listas desde CSV ---
-def cargar_lista_desde_csv(ruta):
-    try:
-        df = pd.read_csv(ruta)
-        return df.iloc[:, 0].dropna().tolist()
-    except:
+# Utilidades CSV
+def leer_csv(ruta):
+    if not os.path.exists(ruta):
         return []
+    with open(ruta, newline='', encoding='utf-8') as f:
+        return list(csv.DictReader(f))
 
-# --- Utilidad para guardar datos nuevos en CSV ---
-def guardar_en_csv(nombre_archivo, encabezados, datos):
-    existe = os.path.exists(nombre_archivo)
-    with open(nombre_archivo, 'a', newline='', encoding='utf-8') as f:
+def escribir_csv(ruta, datos, encabezados):
+    archivo_existe = os.path.exists(ruta)
+    with open(ruta, 'a', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=encabezados)
-        if not existe:
+        if not archivo_existe:
             writer.writeheader()
         writer.writerow(datos)
 
+def guardar_en_google(url_script, datos):
+    try:
+        requests.post(url_script, data=datos)
+    except Exception as e:
+        print("Error al enviar a Google Sheets:", e)
+
+# --- Rutas ---
 @app.route('/')
 def inicio():
     config = cargar_configuracion()
@@ -36,21 +38,13 @@ def inicio():
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
     config = cargar_configuracion()
-    url_script = config.get('URLScript', '')
-
-    # Precarga desde CSV local
-    proveedores = cargar_lista_desde_csv('data/proveedores.csv')
-    productos = cargar_lista_desde_csv('data/productos.csv')
+    proveedores = leer_csv('data/proveedores.csv')
+    productos = leer_csv('data/productos.csv')
     formas_pago = ['Efectivo', 'SINPE', 'Tarjeta Cr.']
-    monedas = ['CRC', 'USD']
-
-    # Parámetros seleccionados si vienen de los formularios modales
-    seleccionado = request.args.get('seleccionado', '')
-    producto_seleccionado = request.args.get('producto', '')
-
+    mensaje = ''
+    
     if request.method == 'POST':
         datos = {
-            'tipo': 'compras',
             'Fecha': request.form['Fecha'],
             'N_Documento': request.form['N_Documento'],
             'Proveedor': request.form['Proveedor'],
@@ -58,74 +52,78 @@ def compras():
             'Cantidad': request.form['Cantidad'],
             'PrecioUnitario': request.form['PrecioUnitario'],
             'Moneda': request.form['Moneda'],
-            'Total': float(request.form['Cantidad']) * float(request.form['PrecioUnitario']),
+            'Total': request.form['Total'],
             'Forma_Pago': request.form['Forma_Pago'],
             'Observaciones': request.form['Observaciones']
         }
-        try:
-            requests.post(url_script, json=datos)
-            flash("✅ Compra registrada correctamente.")
-        except Exception as e:
-            flash("❌ Error al guardar la compra.")
-            print("Error compras:", e)
-        return redirect('/compras')
+        escribir_csv('data/compras.csv', datos, list(datos.keys()))
+        guardar_en_google(config.get('URLScript', ''), datos)
+        mensaje = '✅ Compra registrada exitosamente'
 
-    return render_template('compras.html',
-                           proveedores=proveedores,
-                           productos=productos,
-                           formas_pago=formas_pago,
-                           monedas=monedas,
-                           seleccionado=seleccionado,
-                           producto_seleccionado=producto_seleccionado)
+    return render_template('compras.html', proveedores=proveedores, productos=productos,
+                           formas_pago=formas_pago, mensaje=mensaje)
 
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
-    nombre = request.form['NombreProveedor'].strip()
-    telefono = request.form['TelefonoProveedor'].strip()
-    contacto = request.form['ContactoProveedor'].strip()
-    tipo = request.form['TipoProveedor'].strip()
+    config = cargar_configuracion()
+    nombre = request.form['nombre'].strip()
+    if not nombre:
+        return jsonify({'error': 'El nombre es obligatorio'}), 400
 
-    existentes = cargar_lista_desde_csv('data/proveedores.csv')
-    if nombre.lower() in [p.lower() for p in existentes]:
-        flash("⚠️ Ya existe un proveedor con ese nombre.")
-    else:
-        datos = {
-            'Nombre': nombre,
-            'Teléfono': telefono,
-            'Email': '',
-            'Contacto': contacto,
-            'Celular': '',
-            'Tipo de Negocio': tipo,
-            'Observaciones': ''
-        }
-        guardar_en_csv('data/proveedores.csv',
-                       ['Nombre', 'Teléfono', 'Email', 'Contacto', 'Celular', 'Tipo de Negocio', 'Observaciones'],
-                       datos)
-        flash("✅ Proveedor agregado correctamente.")
-    return redirect(f'/compras?seleccionado={nombre}')
+    proveedores = leer_csv('data/proveedores.csv')
+    if any(p['Nombre'].lower() == nombre.lower() for p in proveedores):
+        return jsonify({'error': 'Ya existe un proveedor con ese nombre'}), 409
+
+    nuevo = {
+        'Nombre': nombre,
+        'Teléfono': request.form.get('telefono', ''),
+        'Email': request.form.get('email', ''),
+        'Contacto': request.form.get('contacto', ''),
+        'Celular': request.form.get('celular', ''),
+        'Tipo de Negocio': request.form.get('tipo_negocio', ''),
+        'Observaciones': request.form.get('observaciones', '')
+    }
+
+    escribir_csv('data/proveedores.csv', nuevo, list(nuevo.keys()))
+    guardar_en_google(config.get('URLScriptProveedores', ''), nuevo)
+    return jsonify({'ok': True})
 
 @app.route('/nuevo_producto', methods=['POST'])
 def nuevo_producto():
-    nombre = request.form['NombreProducto'].strip()
-    categoria = request.form['CategoriaProducto'].strip()
-    unidad = request.form['UnidadProducto'].strip()
+    config = cargar_configuracion()
+    nombre = request.form['nombre'].strip()
+    if not nombre:
+        return jsonify({'error': 'El nombre es obligatorio'}), 400
 
-    existentes = cargar_lista_desde_csv('data/productos.csv')
-    if nombre.lower() in [p.lower() for p in existentes]:
-        flash("⚠️ Ya existe un producto con ese nombre.")
-    else:
-        datos = {
-            'Nombre': nombre,
-            'Categoría': categoria,
-            'Unidad': unidad,
-            'Proveedor': '',
-            'Observaciones': ''
-        }
-        guardar_en_csv('data/productos.csv',
-                       ['Nombre', 'Categoría', 'Unidad', 'Proveedor', 'Observaciones'],
-                       datos)
-        flash("✅ Producto agregado correctamente.")
-    return redirect(f'/compras?producto={nombre}')
+    productos = leer_csv('data/productos.csv')
+    if any(p['Nombre'].lower() == nombre.lower() for p in productos):
+        return jsonify({'error': 'Ya existe un producto con ese nombre'}), 409
+
+    nuevo = {
+        'Nombre': nombre,
+        'Proveedor': request.form.get('proveedor', ''),
+        'Categoría': request.form.get('categoria', ''),
+        'Unidad': request.form.get('unidad', ''),
+        'Observaciones': request.form.get('observaciones', '')
+    }
+
+    escribir_csv('data/productos.csv', nuevo, list(nuevo.keys()))
+    guardar_en_google(config.get('URLScriptProductos', ''), nuevo)
+    return jsonify({'ok': True})
+
+@app.route('/datos_formulario')
+def datos_formulario():
+    proveedores = leer_csv('data/proveedores.csv')
+    productos = leer_csv('data/productos.csv')
+    categorias = [x['Categoría'] for x in leer_csv('data/categorias.csv')]
+    unidades = [x['Unidad'] for x in leer_csv('data/unidades.csv')]
+
+    return jsonify({
+        'proveedores': proveedores,
+        'productos': productos,
+        'categorias': categorias,
+        'unidades': unidades
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
