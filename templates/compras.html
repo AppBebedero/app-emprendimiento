@@ -1,169 +1,236 @@
 {% extends "base.html" %}
-{% block title %}Registro de Compras{% endblock %}
+{% block title %}Registrar Compras{% endblock %}
 
 {% block content %}
 <div class="container mt-4 mb-5">
   <div class="card shadow p-4">
-    <h2 class="mb-4 text-center">🛒 Registro de Compras</h2>
+    <h2 class="mb-4 text-center">🧾 Registrar Compra</h2>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for msg in messages %}
-          <div class="alert alert-info">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    {% if mensaje %}
+      <div class="alert alert-success text-center">{{ mensaje }}</div>
+    {% endif %}
 
-    <form method="POST" action="/compras">
-      <div class="row">
-        <div class="col-md-4 mb-3">
+    <form method="POST" id="form-compras">
+      <div class="row mb-3">
+        <div class="col-md-6">
           <label>Fecha:</label>
           <input type="date" name="Fecha" class="form-control" required>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6">
           <label>N° Documento:</label>
           <input type="text" name="N_Documento" class="form-control" required>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label>Forma de Pago:</label>
-          <select name="Forma_Pago" class="form-control" required>
-            {% for f in formas_pago %}
-              <option value="{{ f }}">{{ f }}</option>
-            {% endfor %}
-          </select>
         </div>
       </div>
 
       <div class="mb-3 position-relative">
         <label>Proveedor:</label>
-        <div class="d-flex">
-          <select name="Proveedor" class="form-control me-2" required>
-            <option value="">Seleccione un proveedor</option>
-            {% for p in proveedores %}
-              <option value="{{ p }}" {% if p == seleccionado %}selected{% endif %}>{{ p }}</option>
-            {% endfor %}
-          </select>
-          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalProveedor">+</button>
+        <div class="input-group">
+          <select name="Proveedor" id="proveedor" class="form-select" required></select>
+          <button type="button" class="btn btn-outline-secondary" onclick="abrirModalProveedor()">+</button>
         </div>
       </div>
 
       <div class="mb-3 position-relative">
         <label>Producto:</label>
-        <div class="d-flex">
-          <select name="Producto" class="form-control me-2" required>
-            <option value="">Seleccione un producto</option>
-            {% for p in productos %}
-              <option value="{{ p }}" {% if p == producto_seleccionado %}selected{% endif %}>{{ p }}</option>
-            {% endfor %}
-          </select>
-          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalProducto">+</button>
+        <div class="input-group">
+          <select name="Producto" id="producto" class="form-select" required></select>
+          <button type="button" class="btn btn-outline-secondary" onclick="abrirModalProducto()">+</button>
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-md-3 mb-3">
+      <div class="row mb-3">
+        <div class="col-md-4">
           <label>Cantidad:</label>
-          <input type="number" step="any" name="Cantidad" class="form-control" required>
+          <input type="number" name="Cantidad" step="any" class="form-control" required>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4">
           <label>Precio Unitario:</label>
-          <input type="number" step="any" name="PrecioUnitario" class="form-control" required>
+          <input type="number" name="PrecioUnitario" step="any" class="form-control" required>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-4">
           <label>Moneda:</label>
-          <select name="Moneda" class="form-control" required>
-            {% for m in monedas %}
-              <option value="{{ m }}">{{ m }}</option>
-            {% endfor %}
+          <select name="Moneda" class="form-select" required>
+            <option value="₡">₡</option>
+            <option value="$">$</option>
           </select>
         </div>
       </div>
 
       <div class="mb-3">
+        <label>Forma de Pago:</label>
+        <select name="Forma_Pago" class="form-select" required>
+          {% for forma in formas_pago %}
+            <option value="{{ forma }}">{{ forma }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
         <label>Observaciones:</label>
-        <textarea name="Observaciones" class="form-control" rows="3"></textarea>
+        <textarea name="Observaciones" class="form-control" rows="2"></textarea>
       </div>
 
       <div class="text-center">
-        <button type="submit" class="btn btn-primary px-5">Registrar Compra</button>
+        <button type="submit" class="btn btn-primary px-4">Registrar Compra</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal Proveedor -->
-<div class="modal fade" id="modalProveedor" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="/nuevo_proveedor" class="modal-content">
+<div class="modal fade" id="modalProveedor" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
       <div class="modal-header">
-        <h5 class="modal-title">➕ Nuevo Proveedor</h5>
+        <h5 class="modal-title">Nuevo Proveedor</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="mb-2">
-          <label>Nombre:</label>
-          <input type="text" name="NombreProveedor" class="form-control" required>
+      <form id="formProveedor">
+        <div class="modal-body">
+          <div class="mb-2"><label>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label>Teléfono:</label><input name="telefono" class="form-control"></div>
+          <div class="mb-2"><label>Email:</label><input name="email" class="form-control"></div>
+          <div class="mb-2"><label>Contacto:</label><input name="contacto" class="form-control"></div>
+          <div class="mb-2"><label>Celular:</label><input name="celular" class="form-control"></div>
+          <div class="mb-2"><label>Tipo de Negocio:</label>
+            <select name="tipo_negocio" class="form-select" id="tipo_negocio"></select>
+          </div>
+          <div class="mb-2"><label>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
+          <div id="errorProveedor" class="text-danger small mt-2"></div>
         </div>
-        <div class="mb-2">
-          <label>Teléfono:</label>
-          <input type="text" name="TelefonoProveedor" class="form-control">
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
         </div>
-        <div class="mb-2">
-          <label>Contacto:</label>
-          <input type="text" name="ContactoProveedor" class="form-control">
-        </div>
-        <div class="mb-2">
-          <label>Tipo de Negocio:</label>
-          <select name="TipoProveedor" class="form-control">
-            {% for t in cargar_lista_desde_csv('data/tipo_negocio.csv') %}
-              <option value="{{ t }}">{{ t }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 
 <!-- Modal Producto -->
-<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="/nuevo_producto" class="modal-content">
+<div class="modal fade" id="modalProducto" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
       <div class="modal-header">
-        <h5 class="modal-title">➕ Nuevo Producto</h5>
+        <h5 class="modal-title">Nuevo Producto</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="mb-2">
-          <label>Nombre:</label>
-          <input type="text" name="NombreProducto" class="form-control" required>
+      <form id="formProducto">
+        <div class="modal-body">
+          <div class="mb-2"><label>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label>Proveedor:</label>
+            <select name="proveedor" class="form-select" id="producto_proveedor"></select>
+          </div>
+          <div class="mb-2"><label>Categoría:</label>
+            <select name="categoria" class="form-select" id="categoria"></select>
+          </div>
+          <div class="mb-2"><label>Unidad:</label>
+            <select name="unidad" class="form-select" id="unidad"></select>
+          </div>
+          <div class="mb-2"><label>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
+          <div id="errorProducto" class="text-danger small mt-2"></div>
         </div>
-        <div class="mb-2">
-          <label>Categoría:</label>
-          <select name="CategoriaProducto" class="form-control">
-            {% for c in cargar_lista_desde_csv('data/categorias.csv') %}
-              <option value="{{ c }}">{{ c }}</option>
-            {% endfor %}
-          </select>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
         </div>
-        <div class="mb-2">
-          <label>Unidad:</label>
-          <select name="UnidadProducto" class="form-control">
-            {% for u in cargar_lista_desde_csv('data/unidades.csv') %}
-              <option value="{{ u }}">{{ u }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
+
+<script>
+function abrirModalProveedor() {
+  document.getElementById('formProveedor').reset();
+  document.getElementById('errorProveedor').textContent = '';
+  new bootstrap.Modal(document.getElementById('modalProveedor')).show();
+}
+
+function abrirModalProducto() {
+  document.getElementById('formProducto').reset();
+  document.getElementById('errorProducto').textContent = '';
+  new bootstrap.Modal(document.getElementById('modalProducto')).show();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const res = await fetch('/datos_formulario');
+  const datos = await res.json();
+
+  // Proveedores
+  const proveedorSelects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
+  proveedorSelects.forEach(select => {
+    select.innerHTML = datos.proveedores.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
+  });
+
+  // Productos
+  const productoSelect = document.getElementById('producto');
+  productoSelect.innerHTML = datos.productos.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
+
+  // Categorías
+  const categoriaSelect = document.getElementById('categoria');
+  categoriaSelect.innerHTML = datos.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // Unidades
+  const unidadSelect = document.getElementById('unidad');
+  unidadSelect.innerHTML = datos.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
+
+  // Tipo de negocio
+  const tipoNegocio = document.getElementById('tipo_negocio');
+  tipoNegocio.innerHTML = ['Suministros', 'Oficina', 'Librería', 'Otros'].map(t => `<option value="${t}">${t}</option>`).join('');
+});
+
+document.getElementById('formProveedor').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const error = document.getElementById('errorProveedor');
+
+  try {
+    const res = await fetch('/nuevo_proveedor', {
+      method: 'POST',
+      body: data
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      const nuevo = data.get('nombre');
+      const selects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
+      selects.forEach(s => s.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`));
+      selects.forEach(s => s.value = nuevo);
+      bootstrap.Modal.getInstance(document.getElementById('modalProveedor')).hide();
+    } else {
+      error.textContent = result.error || 'Error al registrar';
+    }
+  } catch (err) {
+    error.textContent = 'Error al conectar con el servidor';
+  }
+});
+
+document.getElementById('formProducto').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const error = document.getElementById('errorProducto');
+
+  try {
+    const res = await fetch('/nuevo_producto', {
+      method: 'POST',
+      body: data
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      const nuevo = data.get('nombre');
+      const select = document.getElementById('producto');
+      select.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`);
+      select.value = nuevo;
+      bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
+    } else {
+      error.textContent = result.error || 'Error al registrar';
+    }
+  } catch (err) {
+    error.textContent = 'Error al conectar con el servidor';
+  }
+});
+</script>
 {% endblock %}
