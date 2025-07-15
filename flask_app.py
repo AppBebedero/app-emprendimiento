@@ -44,21 +44,24 @@ def compras():
     mensaje = ''
     
     if request.method == 'POST':
-        datos = {
-            'Fecha': request.form['Fecha'],
-            'N_Documento': request.form['N_Documento'],
-            'Proveedor': request.form['Proveedor'],
-            'Producto': request.form['Producto'],
-            'Cantidad': request.form['Cantidad'],
-            'PrecioUnitario': request.form['PrecioUnitario'],
-            'Moneda': request.form['Moneda'],
-            'Total': request.form['Total'],
-            'Forma_Pago': request.form['Forma_Pago'],
-            'Observaciones': request.form['Observaciones']
-        }
-        escribir_csv('data/compras.csv', datos, list(datos.keys()))
-        guardar_en_google(config.get('URLScript', ''), datos)
-        mensaje = '✅ Compra registrada exitosamente'
+        try:
+            datos = {
+                'Fecha': request.form['Fecha'],
+                'N_Documento': request.form['N_Documento'],
+                'Proveedor': request.form['Proveedor'],
+                'Producto': request.form['Producto'],
+                'Cantidad': request.form['Cantidad'],
+                'PrecioUnitario': request.form['PrecioUnitario'],
+                'Moneda': request.form['Moneda'],
+                'Total': request.form.get('Total', ''),
+                'Forma_Pago': request.form['Forma_Pago'],
+                'Observaciones': request.form['Observaciones']
+            }
+            escribir_csv('data/compras.csv', datos, list(datos.keys()))
+            guardar_en_google(config.get('URLScript', ''), datos)
+            mensaje = '✅ Compra registrada exitosamente'
+        except Exception as e:
+            mensaje = f'❌ Error al registrar la compra: {e}'
 
     return render_template('compras.html', proveedores=proveedores, productos=productos,
                            formas_pago=formas_pago, mensaje=mensaje)
@@ -67,8 +70,10 @@ def compras():
 def nuevo_proveedor():
     config = cargar_configuracion()
     nombre = request.form['nombre'].strip()
-    if not nombre:
-        return jsonify({'error': 'El nombre es obligatorio'}), 400
+    tipo_negocio = request.form.get('tipo_negocio', '').strip()
+
+    if not nombre or not tipo_negocio:
+        return jsonify({'error': 'Debe ingresar el nombre y tipo de negocio'}), 400
 
     proveedores = leer_csv('data/proveedores.csv')
     if any(p['Nombre'].lower() == nombre.lower() for p in proveedores):
@@ -80,7 +85,7 @@ def nuevo_proveedor():
         'Email': request.form.get('email', ''),
         'Contacto': request.form.get('contacto', ''),
         'Celular': request.form.get('celular', ''),
-        'Tipo de Negocio': request.form.get('tipo_negocio', ''),
+        'Tipo de Negocio': tipo_negocio,
         'Observaciones': request.form.get('observaciones', '')
     }
 
@@ -92,8 +97,12 @@ def nuevo_proveedor():
 def nuevo_producto():
     config = cargar_configuracion()
     nombre = request.form['nombre'].strip()
-    if not nombre:
-        return jsonify({'error': 'El nombre es obligatorio'}), 400
+    proveedor = request.form.get('proveedor', '').strip()
+    categoria = request.form.get('categoria', '').strip()
+    unidad = request.form.get('unidad', '').strip()
+
+    if not all([nombre, proveedor, categoria, unidad]):
+        return jsonify({'error': 'Debe llenar todos los campos excepto observaciones'}), 400
 
     productos = leer_csv('data/productos.csv')
     if any(p['Nombre'].lower() == nombre.lower() for p in productos):
@@ -101,9 +110,9 @@ def nuevo_producto():
 
     nuevo = {
         'Nombre': nombre,
-        'Proveedor': request.form.get('proveedor', ''),
-        'Categoría': request.form.get('categoria', ''),
-        'Unidad': request.form.get('unidad', ''),
+        'Proveedor': proveedor,
+        'Categoría': categoria,
+        'Unidad': unidad,
         'Observaciones': request.form.get('observaciones', '')
     }
 
@@ -115,12 +124,14 @@ def nuevo_producto():
 def datos_formulario():
     proveedores = leer_csv('data/proveedores.csv')
     productos = leer_csv('data/productos.csv')
+    tipos_negocio = [x['Tipo'] for x in leer_csv('data/tipos_negocio.csv')]
     categorias = [x['Categoría'] for x in leer_csv('data/categorias.csv')]
     unidades = [x['Unidad'] for x in leer_csv('data/unidades.csv')]
 
     return jsonify({
         'proveedores': proveedores,
         'productos': productos,
+        'tipos_negocio': tipos_negocio,
         'categorias': categorias,
         'unidades': unidades
     })
