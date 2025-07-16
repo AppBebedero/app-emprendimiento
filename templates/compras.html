@@ -78,16 +78,73 @@
           <i class="bi bi-check-circle me-1"></i>Guardar
         </button>
       </div>
-
-      <!-- Mensaje centrado y más visible -->
-      <div id="mensajeCompra" class="text-center mt-4 fw-bold" style="font-size: 1.3rem;"></div>
+      <div id="mensajeCompra" class="text-center mt-3"></div>
     </form>
   </div>
 </div>
+<!-- Modal Proveedor -->
+<div class="modal fade" id="modalProveedor" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i>Nuevo Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formProveedor">
+        <div class="modal-body">
+          <div class="mb-2"><label><i class="bi bi-person-fill me-1"></i>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label><i class="bi bi-telephone me-1"></i>Teléfono:</label><input name="telefono" id="telefono" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-envelope me-1"></i>Email:</label><input name="email" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-person-lines-fill me-1"></i>Contacto:</label><input name="contacto" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-phone me-1"></i>Celular:</label><input name="celular" id="celular" class="form-control"></div>
+          <div class="mb-2"><label><i class="bi bi-briefcase me-1"></i>Tipo de Negocio:</label>
+            <select name="tipo_negocio" class="form-select" id="tipo_negocio" required></select>
+          </div>
+          <div class="mb-2"><label><i class="bi bi-chat-left-dots me-1"></i>Observaciones:</label><textarea name="observaciones" class="form-control"></textarea></div>
+          <div id="errorProveedor" class="text-danger small mt-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+          <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-<!-- Aquí siguen los modales tal como ya los tienes (Proveedor y Producto) -->
-<!-- No los repito para no extender demasiado, pero no se modifican -->
-
+<!-- Modal Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formProducto">
+        <div class="modal-body">
+          <div class="mb-2"><label><i class="bi bi-box me-1"></i>Nombre:</label><input name="nombre" class="form-control" required></div>
+          <div class="mb-2"><label><i class="bi bi-person-vcard me-1"></i>Proveedor:</label>
+            <select name="proveedor" class="form-select" id="producto_proveedor" required></select>
+          </div>
+          <div class="mb-2"><label><i class="bi bi-tags me-1"></i>Categoría:</label>
+            <select name="categoria" class="form-select" id="categoria" required></select>
+          </div>
+          <div class="mb-2"><label><i class="bi bi-upc-scan me-1"></i>Unidad:</label>
+            <select name="unidad" class="form-select" id="unidad" required></select>
+          </div>
+          <div class="mb-2"><label><i class="bi bi-chat-left-text me-1"></i>Observaciones:</label>
+            <textarea name="observaciones" class="form-control"></textarea>
+          </div>
+          <div id="errorProducto" class="text-danger small mt-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+          <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
 
@@ -164,6 +221,68 @@ document.getElementById('form-compras').addEventListener('submit', async e => {
     console.error(err);
   } finally {
     btn.disabled = false;
+  }
+});
+
+// Modal: Guardar nuevo proveedor
+document.getElementById('formProveedor').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const error = document.getElementById('errorProveedor');
+
+  error.textContent = 'Guardando...';
+
+  try {
+    const res = await fetch('/nuevo_proveedor', {
+      method: 'POST',
+      body: data
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      const nuevo = data.get('nombre');
+      const selects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
+      selects.forEach(s => s.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`));
+      selects.forEach(s => s.value = nuevo);
+      bootstrap.Modal.getInstance(document.getElementById('modalProveedor')).hide();
+    } else {
+      error.textContent = result.error || '❌ Error al guardar';
+    }
+  } catch (err) {
+    error.textContent = '❌ Error de conexión';
+    console.error(err);
+  }
+});
+
+// Modal: Guardar nuevo producto
+document.getElementById('formProducto').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const error = document.getElementById('errorProducto');
+
+  error.textContent = 'Guardando...';
+
+  try {
+    const res = await fetch('/nuevo_producto', {
+      method: 'POST',
+      body: data
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      const nuevo = data.get('nombre');
+      const select = document.getElementById('producto');
+      select.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`);
+      select.value = nuevo;
+      bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
+    } else {
+      error.textContent = result.error || '❌ Error al guardar';
+    }
+  } catch (err) {
+    error.textContent = '❌ Error de conexión';
+    console.error(err);
   }
 });
 </script>
