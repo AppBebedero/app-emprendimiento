@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify
 from config_loader import cargar_configuracion
 import pandas as pd
 import requests
@@ -46,8 +46,7 @@ def compras():
                 'Moneda': data['Moneda'],
                 'Total': str(float(data['Cantidad']) * float(data['PrecioUnitario'])),
                 'Forma_Pago': data['Forma_Pago'],
-                'Observaciones': data['Observaciones'],
-                'tipo': 'compras'
+                'Observaciones': data['Observaciones']
             }
 
             # Guardar en CSV local
@@ -59,10 +58,10 @@ def compras():
                     writer.writeheader()
                 writer.writerow(datos)
 
-            # Enviar a Google Sheets como JSON
+            # Enviar a Google Sheets en formato JSON
             url = config.get('URLScript', '')
-            r = requests.post(url, json=datos)
-            print("📥 Respuesta Google:", r.text)
+            respuesta = requests.post(url, json=datos)
+            print("📥 Respuesta Google:", respuesta.text)
 
             return jsonify({'mensaje': 'Guardado correctamente'}), 200
         except Exception as e:
@@ -93,8 +92,8 @@ def nuevo_proveedor():
     config = cargar_configuracion()
     try:
         data = request.form
-        nombre = data.get('nombre').strip()
-        tipo = data.get('tipo_negocio').strip()
+        nombre = data.get('nombre', '').strip()
+        tipo = data.get('tipo_negocio', '').strip()
 
         if not nombre or not tipo:
             return jsonify({'error': 'Nombre y tipo de negocio son obligatorios'}), 400
@@ -110,9 +109,8 @@ def nuevo_proveedor():
             'Email': data.get('email', ''),
             'Contacto': data.get('contacto', ''),
             'Celular': data.get('celular', ''),
-            'tipo_negocio': tipo,
-            'observaciones': data.get('observaciones', ''),
-            'tipo': 'proveedor'
+            'Tipo de Negocio': tipo,
+            'Observaciones': data.get('observaciones', '')
         }
 
         archivo_nuevo = not os.path.exists(ruta)
@@ -123,8 +121,8 @@ def nuevo_proveedor():
             writer.writerow(nuevo)
 
         url = config.get('URLScriptProveedores', '')
-        r = requests.post(url, json=nuevo)
-        print("📥 Respuesta proveedor:", r.text)
+        respuesta = requests.post(url, json=nuevo)
+        print("📥 Respuesta proveedor:", respuesta.text)
 
         return jsonify({'mensaje': 'Proveedor guardado'}), 200
     except Exception as e:
@@ -136,7 +134,7 @@ def nuevo_producto():
     config = cargar_configuracion()
     try:
         data = request.form
-        nombre = data.get('nombre').strip()
+        nombre = data.get('nombre', '').strip()
 
         if not nombre:
             return jsonify({'error': 'Nombre es obligatorio'}), 400
@@ -148,11 +146,10 @@ def nuevo_producto():
 
         nuevo = {
             'Nombre': nombre,
-            'proveedor': data.get('proveedor', ''),
-            'categoria': data.get('categoria', ''),
-            'unidad': data.get('unidad', ''),
-            'observaciones': data.get('observaciones', ''),
-            'tipo': 'producto'
+            'Proveedor': data.get('proveedor', ''),
+            'Categoría': data.get('categoria', ''),
+            'Unidad': data.get('unidad', ''),
+            'Observaciones': data.get('observaciones', '')
         }
 
         archivo_nuevo = not os.path.exists(ruta)
@@ -163,8 +160,8 @@ def nuevo_producto():
             writer.writerow(nuevo)
 
         url = config.get('URLScriptProductos', '')
-        r = requests.post(url, json=nuevo)
-        print("📥 Respuesta producto:", r.text)
+        respuesta = requests.post(url, json=nuevo)
+        print("📥 Respuesta producto:", respuesta.text)
 
         return jsonify({'mensaje': 'Producto guardado'}), 200
     except Exception as e:
