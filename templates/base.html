@@ -13,6 +13,13 @@
   <style>
     body {
       padding-top: 56px;
+      margin: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .navbar {
+      background-color: #6f42c1 !important;
     }
     .sidebar {
       height: 100vh;
@@ -20,12 +27,21 @@
       top: 56px;
       left: 0;
       width: 250px;
-      background-color: #f8f9fa;
+      background-color: #d0f0c0; /* verde menta */
       padding: 1rem;
       overflow-y: auto;
+      z-index: 1040;
+    }
+    .sidebar .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
     }
     .content {
       margin-left: 250px;
+      margin-bottom: 60px;
       padding: 2rem;
     }
     .accordion-button::after {
@@ -34,22 +50,55 @@
     .nav-link {
       padding-left: 1.5rem;
     }
+
+    /* Barra inferior fija */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #6f42c1;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0.5rem 0;
+      z-index: 1050;
+    }
+    .bottom-bar a {
+      color: white;
+      text-align: center;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .bottom-bar a:hover {
+      color: #ffd700;
+    }
+
+    /* Para móviles: ocultar menú lateral por defecto */
+    @media (max-width: 991.98px) {
+      .sidebar {
+        display: none;
+      }
+      .content {
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
-<body>
+<body style="background-image: url('/static/fondo.jpg');">
 
   <!-- Barra superior -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="/">📘 {{ config.get('NombreNegocio', 'Negocio') }}</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+      <button class="navbar-toggler" type="button" onclick="document.getElementById('sidebarMenu').style.display='block'">
         <span class="navbar-toggler-icon"></span>
       </button>
     </div>
   </nav>
 
   <!-- Menú lateral -->
-  <div class="sidebar collapse d-lg-block" id="sidebarMenu">
+  <div class="sidebar" id="sidebarMenu">
+    <span class="close-btn" onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
     <div class="accordion" id="menuAccordion">
 
       <!-- Materiales -->
@@ -147,7 +196,14 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Bootstrap JS -->
+  <!-- Barra inferior fija -->
+  <div class="bottom-bar">
+    <a href="/"><i class="bi bi-house-door-fill"></i><br>Inicio</a>
+    <a href="/reportes"><i class="bi bi-graph-up"></i><br>Reportes</a>
+    <a href="/configuracion"><i class="bi bi-gear-fill"></i><br>Configuración</a>
+  </div>
+
+  <!-- JS Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
