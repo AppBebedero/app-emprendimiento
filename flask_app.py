@@ -61,7 +61,7 @@ def compras():
 
             # Enviar a Google Sheets
             url = config.get('URLScript', '')
-            r = requests.post(url, json=datos)
+            r = requests.post(url, data=datos)
             print("📥 Respuesta Google:", r.text)
 
             return jsonify({'mensaje': 'Guardado correctamente'}), 200
@@ -110,8 +110,8 @@ def nuevo_proveedor():
             'Email': data.get('email', ''),
             'Contacto': data.get('contacto', ''),
             'Celular': data.get('celular', ''),
-            'Tipo': tipo,
-            'Observaciones': data.get('observaciones', ''),
+            'tipo_negocio': tipo,
+            'observaciones': data.get('observaciones', ''),
             'tipo': 'proveedor'
         }
 
@@ -123,7 +123,7 @@ def nuevo_proveedor():
             writer.writerow(nuevo)
 
         url = config.get('URLScriptProveedores', '')
-        r = requests.post(url, json=nuevo)
+        r = requests.post(url, data=nuevo)
         print("📥 Respuesta proveedor:", r.text)
 
         return jsonify({'mensaje': 'Proveedor guardado'}), 200
@@ -148,10 +148,10 @@ def nuevo_producto():
 
         nuevo = {
             'Nombre': nombre,
-            'Proveedor': data.get('proveedor', ''),
-            'Categoría': data.get('categoria', ''),
-            'Unidad': data.get('unidad', ''),
-            'Observaciones': data.get('observaciones', ''),
+            'proveedor': data.get('proveedor', ''),
+            'categoria': data.get('categoria', ''),
+            'unidad': data.get('unidad', ''),
+            'observaciones': data.get('observaciones', ''),
             'tipo': 'producto'
         }
 
@@ -163,7 +163,7 @@ def nuevo_producto():
             writer.writerow(nuevo)
 
         url = config.get('URLScriptProductos', '')
-        r = requests.post(url, json=nuevo)
+        r = requests.post(url, data=nuevo)
         print("📥 Respuesta producto:", r.text)
 
         return jsonify({'mensaje': 'Producto guardado'}), 200
