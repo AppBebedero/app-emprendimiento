@@ -1,14 +1,12 @@
+
 from flask import Flask, render_template, request, jsonify, redirect
+import pandas as pd
 import requests
 import os
 import csv
-from config_loader import cargar_configuracion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
-
-# Cargar configuración una sola vez al iniciar la app
-config = cargar_configuracion()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -23,8 +21,7 @@ def leer_csv_como_diccionario(ruta_csv):
 def leer_lista_simple(ruta_csv):
     try:
         with open(ruta_csv, newline='', encoding='utf-8') as f:
-            return [fila[0] for fila in csv.reader(f)
-                    if fila and fila[0].strip() and fila[0] != 'Seleccione uno']
+            return [fila[0] for fila in csv.reader(f) if fila and fila[0].strip() and fila[0] != 'Seleccione uno']
     except:
         return []
 
@@ -40,7 +37,7 @@ def compras():
                 'Producto': data['Producto'],
                 'Cantidad': data['Cantidad'],
                 'PrecioUnitario': data['PrecioUnitario'],
-                'Moneda': config.get('Moneda', ''),
+                'Moneda': data['Moneda'],
                 'Total': str(float(data['Cantidad']) * float(data['PrecioUnitario'])),
                 'Forma_Pago': data['Forma_Pago'],
                 'Observaciones': data['Observaciones'],
@@ -49,31 +46,25 @@ def compras():
 
             # Guardar en CSV local
             ruta = os.path.join(DATA_DIR, 'compras.csv')
-            nuevo_archivo = not os.path.exists(ruta)
+            archivo_nuevo = not os.path.exists(ruta)
             with open(ruta, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=datos.keys())
-                if nuevo_archivo:
+                if archivo_nuevo:
                     writer.writeheader()
                 writer.writerow(datos)
 
             # Envío a Google Sheets vía Apps Script
-            url_compras = config.get('URLScript')
-            if url_compras:
-                r = requests.post(url_compras, json=datos)
-                print("📥 Respuesta Google:", r.text)
+            url_compras = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
+            r = requests.post(url_compras, json=datos)
+            print("📥 Respuesta Google:", r.text)
 
             return jsonify({'mensaje': 'Guardado correctamente'}), 200
         except Exception as e:
             print("❌ Error en /compras:", e)
             return jsonify({'error': 'Error interno'}), 500
 
-    # Formas de pago y moneda desde config
     formas_pago = ["Efectivo", "SINPE", "Tarjeta Cr."]
-    moneda = config.get('Moneda', '')
-    return render_template('compras.html',
-                           formas_pago=formas_pago,
-                           moneda=moneda,
-                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
+    return render_template('compras.html', formas_pago=formas_pago)
 
 @app.route('/datos_formulario')
 def datos_formulario():
@@ -95,8 +86,8 @@ def datos_formulario():
 def nuevo_proveedor():
     try:
         data = request.form
-        nombre = data.get('nombre', '').strip()
-        tipo = data.get('tipo_negocio', '').strip()
+        nombre = data.get('nombre').strip()
+        tipo = data.get('tipo_negocio').strip()
 
         if not nombre or not tipo:
             return jsonify({'error': 'Nombre y tipo de negocio son obligatorios'}), 400
@@ -117,17 +108,16 @@ def nuevo_proveedor():
             'tipo': 'proveedor'
         }
 
-        nuevo_archivo = not os.path.exists(ruta)
+        archivo_nuevo = not os.path.exists(ruta)
         with open(ruta, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=nuevo.keys())
-            if nuevo_archivo:
+            if archivo_nuevo:
                 writer.writeheader()
             writer.writerow(nuevo)
 
-        url_prov = config.get('URLScriptProveedores')
-        if url_prov:
-            r = requests.post(url_prov, json=nuevo)
-            print("📥 Respuesta proveedor:", r.text)
+        url_proveedores = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
+        r = requests.post(url_proveedores, json=nuevo)
+        print("📥 Respuesta proveedor:", r.text)
 
         return jsonify({'mensaje': 'Proveedor guardado'}), 200
     except Exception as e:
@@ -138,7 +128,7 @@ def nuevo_proveedor():
 def nuevo_producto():
     try:
         data = request.form
-        nombre = data.get('nombre', '').strip()
+        nombre = data.get('nombre').strip()
 
         if not nombre:
             return jsonify({'error': 'Nombre es obligatorio'}), 400
@@ -157,38 +147,33 @@ def nuevo_producto():
             'tipo': 'producto'
         }
 
-        nuevo_archivo = not os.path.exists(ruta)
+        archivo_nuevo = not os.path.exists(ruta)
         with open(ruta, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=nuevo.keys())
-            if nuevo_archivo:
+            if archivo_nuevo:
                 writer.writeheader()
             writer.writerow(nuevo)
 
-        url_prod = config.get('URLScriptProductos')
-        if url_prod:
-            r = requests.post(url_prod, json=nuevo)
-            print("📥 Respuesta producto:", r.text)
+        url_productos = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
+        r = requests.post(url_productos, json=nuevo)
+        print("📥 Respuesta producto:", r.text)
 
         return jsonify({'mensaje': 'Producto guardado'}), 200
     except Exception as e:
         print("❌ Error en nuevo_producto:", e)
         return jsonify({'error': 'Error interno'}), 500
 
-# Rutas para mantenimiento independiente de Proveedores y Productos
+# --- Rutas para mantenimiento independiente de Proveedores y Productos ---
 
 @app.route('/proveedores')
 def proveedores():
     proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
-    return render_template('proveedores.html',
-                           proveedores=proveedores,
-                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
+    return render_template('proveedores.html', proveedores=proveedores)
 
 @app.route('/productos')
 def productos():
     productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
-    return render_template('productos.html',
-                           productos=productos,
-                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
+    return render_template('productos.html', productos=productos)
 
 if __name__ == '__main__':
     app.run(debug=True)
