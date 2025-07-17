@@ -113,7 +113,7 @@
 <body style="background-image: url('/static/fondo.jpg');">
 
   <!-- Barra superior -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: {{ color_principal }} !important;">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand mb-0 h1" href="/">
         {% if logo_exists %}
@@ -121,8 +121,7 @@
         {% endif %}
         {% block topbar_title %}Sistema Gestión Financiera{% endblock %}
       </a>
-      <button class="navbar-toggler" type="button"
-        onclick="document.getElementById('sidebarMenu').style.display='block'">
+      <button class="navbar-toggler" type="button" onclick="document.getElementById('sidebarMenu').style.display='block'">
         <span class="navbar-toggler-icon"></span>
       </button>
     </div>
@@ -130,15 +129,13 @@
 
   <!-- Menú lateral -->
   <div class="sidebar" id="sidebarMenu">
-    <span class="close-btn"
-      onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
+    <span class="close-btn" onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
     <div class="accordion mt-4" id="menuAccordion">
 
       <!-- Compras -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingCompras">
-          <button class="accordion-button collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#collapseCompras">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCompras">
             🮺 Compras
           </button>
         </h2>
@@ -156,8 +153,7 @@
       <!-- Ventas -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingVentas">
-          <button class="accordion-button collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#collapseVentas">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVentas">
             💰 Ventas
           </button>
         </h2>
@@ -175,8 +171,7 @@
       <!-- Finanzas -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingFinanzas">
-          <button class="accordion-button collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#collapseFinanzas">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinanzas">
             📊 Finanzas
           </button>
         </h2>
@@ -193,8 +188,7 @@
       <!-- Configuración -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingConfig">
-          <button class="accordion-button collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#collapseConfig">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig">
             ⚙️ Configuración
           </button>
         </h2>
@@ -211,8 +205,7 @@
       <!-- Otros -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingOtros">
-          <button class="accordion-button collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#collapseOtros">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOtros">
             ℹ️ Otros
           </button>
         </h2>
