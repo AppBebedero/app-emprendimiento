@@ -206,5 +206,57 @@ def productos():
         color_principal=config.get('ColorPrincipal', '#0d6efd')
     )
 
+# ———————————————————————————————————————————————
+# Rutas nuevas para el resto del menú
+
+@app.route('/ventas/facturacion')
+def facturacion():
+    return render_template(
+        'facturacion.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/clientes')
+def clientes():
+    return render_template(
+        'clientes.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/costos')
+def costos():
+    return render_template(
+        'costos.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/finanzas')
+def finanzas():
+    return render_template(
+        'finanzas.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/reportes')
+def reportes():
+    return render_template(
+        'reportes.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/manual')
+def manual():
+    return render_template(
+        'manual.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
+@app.route('/acerca')
+def acerca():
+    return render_template(
+        'acerca.html',
+        color_principal=config.get('ColorPrincipal', '#0d6efd')
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)
