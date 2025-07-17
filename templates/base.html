@@ -27,7 +27,7 @@
       top: 56px;
       left: 0;
       width: 250px;
-      background-color: #ADE8E6; /* verde menta */
+      background-color: #ADE8E6;
       padding: 2rem 1rem 1rem 1rem;
       overflow-y: auto;
       z-index: 1040;
@@ -46,14 +46,15 @@
       padding: 2rem;
     }
     .accordion-button {
-      background-color: #ADE8E6 !important;
+      background-color: #fff !important;
       color: #000;
+      border: 1px solid #ddd;
     }
     .accordion-button:focus {
       box-shadow: none;
     }
     .accordion-button:not(.collapsed) {
-      background-color: #b8e2df !important;
+      background-color: #e9ecef !important;
       color: #000;
     }
     .nav-link {
@@ -61,11 +62,11 @@
       color: #000;
     }
     .nav-link:hover {
-      background-color: #d3f4f3;
+      background-color: #e0f7f5;
       color: #000;
     }
     .nav-link.active {
-      background-color: #b8e2df;
+      background-color: #d1f0ee;
       font-weight: bold;
     }
 
@@ -107,7 +108,7 @@
   <!-- Barra superior -->
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <a class="navbar-brand" href="/">📘 Sistema Gestión Financiera</a>
+      <a class="navbar-brand mb-0 h1" href="/">📘 Sistema Gestión Financiera</a>
       <button class="navbar-toggler" type="button" onclick="document.getElementById('sidebarMenu').style.display='block'">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -123,13 +124,13 @@
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingMateriales">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMateriales">
-            🛠️ Compras
+            🛠️ Materiales
           </button>
         </h2>
         <div id="collapseMateriales" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
           <div class="accordion-body p-0">
             <ul class="nav flex-column">
-              <li><a class="nav-link" href="/compras"><i class="bi bi-cart-fill"></i> Materiales</a></li>
+              <li><a class="nav-link" href="/compras"><i class="bi bi-cart-fill"></i> Compras</a></li>
               <li><a class="nav-link" href="/proveedores"><i class="bi bi-person-badge-fill"></i> Proveedores</a></li>
               <li><a class="nav-link" href="/productos"><i class="bi bi-box-seam"></i> Productos</a></li>
             </ul>
