@@ -22,7 +22,18 @@
              name="ColorPrincipal"
              value="{{ config.get('ColorPrincipal', '#0d6efd') }}"
              class="form-control form-control-color"
-             title="Elige un color">
+             title="Elige un color para las barras">
+    </div>
+
+    <!-- Selector de color de fondo -->
+    <div class="mb-3">
+      <label for="color_fondo" class="form-label">Color de fondo</label>
+      <input type="color"
+             id="color_fondo"
+             name="ColorFondo"
+             value="{{ config.get('ColorFondo', '#ffffff') }}"
+             class="form-control form-control-color"
+             title="Elige un color para el fondo">
     </div>
 
     <button type="submit" class="btn btn-primary">Guardar cambios</button>
