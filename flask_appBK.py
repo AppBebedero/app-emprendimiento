@@ -3,37 +3,47 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import requests
 import os
 import csv
+import json
 from werkzeug.utils import secure_filename
 from config_loader import cargar_configuracion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
 
-# Directorios base
+# Rutas de disco
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 STATIC_IMG_DIR = os.path.join(BASE_DIR, 'static', 'img')
+OVERRIDE_PATH = os.path.join(BASE_DIR, 'config_overrides.json')
 
-# Asegurar que existan
+# Asegurar que existan los directorios
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(STATIC_IMG_DIR, exist_ok=True)
 
-# Configuración de subida de logo
+# Cargar configuración inicial desde Google Sheets
+config = cargar_configuracion()
+
+# Cargar overrides locales (logo + color principal + color fondo)
+overrides = {}
+if os.path.exists(OVERRIDE_PATH):
+    with open(OVERRIDE_PATH, 'r', encoding='utf-8') as f:
+        overrides = json.load(f)
+config.update(overrides)
+
+# Validar extensiones de imagen
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Cargar la configuración una sola vez
-config = cargar_configuracion()
-
-# Inyectar variables globales en todas las plantillas
+# Inyectar variables globales en las plantillas
 @app.context_processor
 def inject_globals():
     logo_path = os.path.join(STATIC_IMG_DIR, 'logo.png')
     return {
         'logo_exists': os.path.exists(logo_path),
         'logo_url': url_for('static', filename='img/logo.png'),
-        'color_principal': config.get('ColorPrincipal', '#0d6efd')
+        'color_principal': config.get('ColorPrincipal', '#0d6efd'),
+        'color_fondo': config.get('ColorFondo', '#ffffff')
     }
 
 def leer_csv_como_diccionario(ruta_csv):
@@ -47,8 +57,7 @@ def leer_lista_simple(ruta_csv):
     try:
         with open(ruta_csv, newline='', encoding='utf-8') as f:
             return [
-                fila[0]
-                for fila in csv.reader(f)
+                fila[0] for fila in csv.reader(f)
                 if fila and fila[0].strip() and fila[0] != 'Seleccione uno'
             ]
     except:
@@ -56,19 +65,38 @@ def leer_lista_simple(ruta_csv):
 
 @app.route('/')
 def inicio():
-    return render_template(
-        'inicio.html',
-        config=config
-    )
+    return render_template('inicio.html', config=config)
 
 @app.route('/configuracion', methods=['GET', 'POST'])
 def configuracion():
     if request.method == 'POST':
+        # 1) Subida de logo
         file = request.files.get('logo')
         if file and allowed_file(file.filename):
             ext = os.path.splitext(file.filename)[1]
             filename = secure_filename('logo' + ext)
-            file.save(os.path.join(STATIC_IMG_DIR, filename))
+            dest = os.path.join(STATIC_IMG_DIR, filename)
+            file.save(dest)
+            # Normalizar a logo.png
+            if ext.lower() != '.png':
+                os.replace(dest, os.path.join(STATIC_IMG_DIR, 'logo.png'))
+
+        # 2) Cambio de color principal
+        nuevo_color = request.form.get('ColorPrincipal')
+        if nuevo_color:
+            overrides['ColorPrincipal'] = nuevo_color
+            config['ColorPrincipal'] = nuevo_color
+
+        # 3) Cambio de color de fondo
+        nuevo_fondo = request.form.get('ColorFondo')
+        if nuevo_fondo:
+            overrides['ColorFondo'] = nuevo_fondo
+            config['ColorFondo'] = nuevo_fondo
+
+        # Guardar overrides en archivo
+        with open(OVERRIDE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(overrides, f)
+
         return redirect(url_for('configuracion'))
 
     return render_template('configuracion.html', config=config)
@@ -133,7 +161,6 @@ def nuevo_proveedor():
         data = request.form
         nombre = data.get('nombre', '').strip()
         tipo = data.get('tipo_negocio', '').strip()
-
         if not nombre or not tipo:
             return jsonify({'error': 'Nombre y tipo de negocio son obligatorios'}), 400
 
@@ -175,7 +202,6 @@ def nuevo_producto():
     try:
         data = request.form
         nombre = data.get('nombre', '').strip()
-
         if not nombre:
             return jsonify({'error': 'Nombre es obligatorio'}), 400
 
@@ -212,21 +238,14 @@ def nuevo_producto():
 
 @app.route('/proveedores')
 def proveedores():
-    proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
-    return render_template(
-        'proveedores.html',
-        proveedores=proveedores
-    )
+    datos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
+    return render_template('proveedores.html', proveedores=datos)
 
 @app.route('/productos')
 def productos():
-    productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
-    return render_template(
-        'productos.html',
-        productos=productos
-    )
+    datos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
+    return render_template('productos.html', productos=datos)
 
-# Rutas nuevas para el resto del menú
 @app.route('/ventas/facturacion')
 def facturacion():
     return render_template('facturacion.html')
@@ -257,4 +276,3 @@ def acerca():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
