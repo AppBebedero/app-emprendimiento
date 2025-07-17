@@ -1,17 +1,39 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import requests
 import os
 import csv
+from werkzeug.utils import secure_filename
 from config_loader import cargar_configuracion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
 
-# Cargar la configuración una sola vez al iniciar la app
-config = cargar_configuracion()
-
+# Directorios base
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
+STATIC_IMG_DIR = os.path.join(BASE_DIR, 'static', 'img')
+
+# Asegurar que existan
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(STATIC_IMG_DIR, exist_ok=True)
+
+# Configuración de subida de logo
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Cargar la configuración una sola vez
+config = cargar_configuracion()
+
+# Inyectar variables globales en todas las plantillas
+@app.context_processor
+def inject_globals():
+    logo_path = os.path.join(STATIC_IMG_DIR, 'logo.png')
+    return {
+        'logo_exists': os.path.exists(logo_path),
+        'logo_url': url_for('static', filename='img/logo.png'),
+        'color_principal': config.get('ColorPrincipal', '#0d6efd')
+    }
 
 def leer_csv_como_diccionario(ruta_csv):
     try:
@@ -33,12 +55,22 @@ def leer_lista_simple(ruta_csv):
 
 @app.route('/')
 def inicio():
-    # Ruta de inicio: muestra la pantalla principal
     return render_template(
         'inicio.html',
-        config=config,
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
+        config=config
     )
+
+@app.route('/configuracion', methods=['GET', 'POST'])
+def configuracion():
+    if request.method == 'POST':
+        file = request.files.get('logo')
+        if file and allowed_file(file.filename):
+            ext = os.path.splitext(file.filename)[1]
+            filename = secure_filename('logo' + ext)
+            file.save(os.path.join(STATIC_IMG_DIR, filename))
+        return redirect(url_for('configuracion'))
+
+    return render_template('configuracion.html', config=config)
 
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
@@ -59,7 +91,6 @@ def compras():
                 'tipo': 'compras'
             }
 
-            # Guardar en CSV local
             ruta = os.path.join(DATA_DIR, 'compras.csv')
             nuevo_archivo = not os.path.exists(ruta)
             with open(ruta, 'a', newline='', encoding='utf-8') as f:
@@ -68,7 +99,6 @@ def compras():
                     writer.writeheader()
                 writer.writerow(datos)
 
-            # Envío a Google Sheets vía Apps Script
             url_compras = config.get('URLScript')
             if url_compras:
                 r = requests.post(url_compras, json=datos)
@@ -83,24 +113,17 @@ def compras():
     return render_template(
         'compras.html',
         formas_pago=formas_pago,
-        moneda=config.get('Moneda', ''),
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
+        moneda=config.get('Moneda', '')
     )
 
 @app.route('/datos_formulario')
 def datos_formulario():
-    proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
-    productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
-    tipos_negocio = leer_lista_simple(os.path.join(DATA_DIR, 'tipos_negocio.csv'))
-    categorias = leer_lista_simple(os.path.join(DATA_DIR, 'categorias.csv'))
-    unidades = leer_lista_simple(os.path.join(DATA_DIR, 'unidades.csv'))
-
     return jsonify({
-        'proveedores': proveedores,
-        'productos': productos,
-        'tipos_negocio': tipos_negocio,
-        'categorias': categorias,
-        'unidades': unidades
+        'proveedores': leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv')),
+        'productos': leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv')),
+        'tipos_negocio': leer_lista_simple(os.path.join(DATA_DIR, 'tipos_negocio.csv')),
+        'categorias': leer_lista_simple(os.path.join(DATA_DIR, 'categorias.csv')),
+        'unidades': leer_lista_simple(os.path.join(DATA_DIR, 'unidades.csv'))
     })
 
 @app.route('/nuevo_proveedor', methods=['POST'])
@@ -186,15 +209,12 @@ def nuevo_producto():
         print("❌ Error en nuevo_producto:", e)
         return jsonify({'error': 'Error interno'}), 500
 
-# Rutas para mantenimiento independiente de Proveedores y Productos
-
 @app.route('/proveedores')
 def proveedores():
     proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
     return render_template(
         'proveedores.html',
-        proveedores=proveedores,
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
+        proveedores=proveedores
     )
 
 @app.route('/productos')
@@ -202,61 +222,37 @@ def productos():
     productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
     return render_template(
         'productos.html',
-        productos=productos,
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
+        productos=productos
     )
 
-# ———————————————————————————————————————————————
 # Rutas nuevas para el resto del menú
-
 @app.route('/ventas/facturacion')
 def facturacion():
-    return render_template(
-        'facturacion.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('facturacion.html')
 
 @app.route('/clientes')
 def clientes():
-    return render_template(
-        'clientes.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('clientes.html')
 
 @app.route('/costos')
 def costos():
-    return render_template(
-        'costos.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('costos.html')
 
 @app.route('/finanzas')
 def finanzas():
-    return render_template(
-        'finanzas.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('finanzas.html')
 
 @app.route('/reportes')
 def reportes():
-    return render_template(
-        'reportes.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('reportes.html')
 
 @app.route('/manual')
 def manual():
-    return render_template(
-        'manual.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('manual.html')
 
 @app.route('/acerca')
 def acerca():
-    return render_template(
-        'acerca.html',
-        color_principal=config.get('ColorPrincipal', '#0d6efd')
-    )
+    return render_template('acerca.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
