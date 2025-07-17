@@ -1,17 +1,20 @@
 {% extends "base.html" %}
-
-{% block title %}Inicio - Party Box{% endblock %}
-{% block topbar_title %}Party Box{% endblock %}
+{% block title %}Inicio – {{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
+{% block topbar_title %}{{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
 
 {% block content %}
   {% if logo_exists %}
     <div class="text-center my-4">
-      <img src="{{ logo_url }}" alt="Logo" class="img-fluid">
+      <img src="{{ logo_url }}" alt="{{ config.get('NombreNegocio') }}" class="img-fluid">
     </div>
   {% endif %}
 
-  <!-- Aquí irán tus indicadores clave -->
+  <!-- Aquí van tus indicadores clave -->
   <div class="row">
-    <!-- p.ej. saldo de caja, total ventas, cuentas pendientes... -->
+    <!-- Ejemplo:
+    <div class="col">
+      <div class="card p-3">Saldo de caja: {{ saldo_caja }}</div>
+    </div>
+    -->
   </div>
 {% endblock %}
