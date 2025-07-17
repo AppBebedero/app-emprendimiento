@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container-fluid mt-4 mb-5">
-  <div class="card shadow p-4">
+  <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
     <h2 class="mb-4 text-center">🧾 Registrar Compra</h2>
 
     {% if mensaje %}
@@ -82,6 +82,7 @@
     </form>
   </div>
 </div>
+
 <!-- Modal Proveedor -->
 <div class="modal fade" id="modalProveedor" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -166,27 +167,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const res = await fetch('/datos_formulario');
   const datos = await res.json();
 
+  // Proveedores
   const proveedorSelects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
   proveedorSelects.forEach(select => {
     select.innerHTML = datos.proveedores.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
   });
 
+  // Productos
   document.getElementById('producto').innerHTML =
     datos.productos.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
 
+  // Tipo de Negocio
   document.getElementById('tipo_negocio').innerHTML =
     datos.tipos_negocio.map(t => `<option value="${t}">${t}</option>`).join('');
 
+  // Categorías
   document.getElementById('categoria').innerHTML =
     datos.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
 
+  // Unidades
   document.getElementById('unidad').innerHTML =
     datos.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
 
+  // Máscaras
   $('#telefono').inputmask('9999-9999');
   $('#celular').inputmask('9999-9999');
 });
 
+// Envío de formulario principal
 document.getElementById('form-compras').addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target;
@@ -198,7 +206,11 @@ document.getElementById('form-compras').addEventListener('submit', async e => {
   btn.disabled = true;
 
   try {
-    const res = await fetch('/compras', { method: 'POST', body: data });
+    const res = await fetch('/compras', {
+      method: 'POST',
+      body: data
+    });
+
     if (res.ok) {
       mensaje.innerHTML = '<span class="text-success">✅ Guardado correctamente</span>';
       form.reset();
@@ -214,6 +226,7 @@ document.getElementById('form-compras').addEventListener('submit', async e => {
   }
 });
 
+// Modal: Guardar nuevo proveedor
 document.getElementById('formProveedor').addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target;
@@ -223,7 +236,10 @@ document.getElementById('formProveedor').addEventListener('submit', async e => {
   error.textContent = 'Guardando...';
 
   try {
-    const res = await fetch('/nuevo_proveedor', { method: 'POST', body: data });
+    const res = await fetch('/nuevo_proveedor', {
+      method: 'POST',
+      body: data
+    });
     const result = await res.json();
 
     if (res.ok) {
@@ -241,6 +257,7 @@ document.getElementById('formProveedor').addEventListener('submit', async e => {
   }
 });
 
+// Modal: Guardar nuevo producto
 document.getElementById('formProducto').addEventListener('submit', async e => {
   e.preventDefault();
   const form = e.target;
@@ -250,7 +267,10 @@ document.getElementById('formProducto').addEventListener('submit', async e => {
   error.textContent = 'Guardando...';
 
   try {
-    const res = await fetch('/nuevo_producto', { method: 'POST', body: data });
+    const res = await fetch('/nuevo_producto', {
+      method: 'POST',
+      body: data
+    });
     const result = await res.json();
 
     if (res.ok) {
