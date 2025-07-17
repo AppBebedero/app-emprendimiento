@@ -52,7 +52,7 @@ def compras():
                     writer.writeheader()
                 writer.writerow(datos)
 
-            # URL fija para pruebas (sustituir la URL cargada del config)
+            # Envío a Google Sheets vía Apps Script
             url_compras = 'https://script.google.com/macros/s/AKfycbzTTyQcKoFtPyqniEfbtUXbi9XQgzHjl_fl4mJvGT4Wq2_93s3hlZPlQ9U5efruNhRr/exec'
             r = requests.post(url_compras, json=datos)
             print("📥 Respuesta Google:", r.text)
@@ -102,7 +102,7 @@ def nuevo_proveedor():
             'Email': data.get('email', ''),
             'Contacto': data.get('contacto', ''),
             'Celular': data.get('celular', ''),
-            'Tipo': tipo,
+            'Tipo_de_Negocio': tipo,
             'Observaciones': data.get('observaciones', ''),
             'tipo': 'proveedor'
         }
@@ -161,6 +161,18 @@ def nuevo_producto():
     except Exception as e:
         print("❌ Error en nuevo_producto:", e)
         return jsonify({'error': 'Error interno'}), 500
+
+# --- Rutas para mantenimiento independiente de Proveedores y Productos ---
+
+@app.route('/proveedores')
+def proveedores():
+    proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
+    return render_template('proveedores.html', proveedores=proveedores)
+
+@app.route('/productos')
+def productos():
+    productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
+    return render_template('productos.html', productos=productos)
 
 if __name__ == '__main__':
     app.run(debug=True)
