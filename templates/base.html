@@ -21,6 +21,14 @@
     .navbar {
       background-color: #6f42c1 !important;
     }
+    .navbar-brand {
+      font-size: 1.25rem;
+    }
+    @media (max-width: 400px) {
+      .navbar-brand {
+        font-size: 1rem;
+      }
+    }
     .sidebar {
       height: 100vh;
       position: fixed;
@@ -120,19 +128,19 @@
     <span class="close-btn" onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
     <div class="accordion mt-4" id="menuAccordion">
 
-      <!-- Materiales -->
+      <!-- Compras -->
       <div class="accordion-item">
-        <h2 class="accordion-header" id="headingMateriales">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMateriales">
-            🛠️ Materiales
+        <h2 class="accordion-header" id="headingCompras">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCompras">
+            🧺 Compras
           </button>
         </h2>
-        <div id="collapseMateriales" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+        <div id="collapseCompras" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
           <div class="accordion-body p-0">
             <ul class="nav flex-column">
-              <li><a class="nav-link" href="/compras"><i class="bi bi-cart-fill"></i> Compras</a></li>
+              <li><a class="nav-link" href="/compras"><i class="bi bi-box-seam"></i> Materiales</a></li>
               <li><a class="nav-link" href="/proveedores"><i class="bi bi-person-badge-fill"></i> Proveedores</a></li>
-              <li><a class="nav-link" href="/productos"><i class="bi bi-box-seam"></i> Productos</a></li>
+              <li><a class="nav-link" href="/productos"><i class="bi bi-tag-fill"></i> Productos</a></li>
             </ul>
           </div>
         </div>
