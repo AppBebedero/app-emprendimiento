@@ -14,7 +14,7 @@
       <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
     </div>
 
-    <!-- Selector de color principal -->
+    <!-- Color de las barras -->
     <div class="mb-3">
       <label for="color_principal" class="form-label">Color principal</label>
       <input type="color"
@@ -25,7 +25,7 @@
              title="Elige un color para las barras">
     </div>
 
-    <!-- Selector de color de fondo -->
+    <!-- Color de fondo de la App -->
     <div class="mb-3">
       <label for="color_fondo" class="form-label">Color de fondo</label>
       <input type="color"
@@ -33,7 +33,7 @@
              name="ColorFondo"
              value="{{ config.get('ColorFondo', '#ffffff') }}"
              class="form-control form-control-color"
-             title="Elige un color para el fondo">
+             title="Elige un color para el fondo de la página">
     </div>
 
     <button type="submit" class="btn btn-primary">Guardar cambios</button>
