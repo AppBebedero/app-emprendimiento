@@ -3,6 +3,19 @@
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">⚙️ Configuración actual</h2>
+
+  <!-- Formulario para subir logo -->
+  <form action="/configuracion" method="POST" enctype="multipart/form-data" class="mb-4">
+    <div class="mb-3">
+      <label for="logo" class="form-label">Subir logo</label>
+      <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar logo</button>
+  </form>
+
+  <hr>
+
+  <!-- Listado de valores de configuración -->
   <ul class="list-group">
     {% for clave, valor in config.items() %}
       <li class="list-group-item">
