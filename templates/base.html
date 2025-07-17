@@ -18,17 +18,21 @@
       background-position: center;
       background-repeat: no-repeat;
     }
+
     .navbar {
       background-color: #6f42c1 !important;
     }
+
     .navbar-brand {
       font-size: 1.25rem;
     }
+
     @media (max-width: 400px) {
       .navbar-brand {
         font-size: 1rem;
       }
     }
+
     .sidebar {
       height: 100vh;
       position: fixed;
@@ -40,6 +44,7 @@
       overflow-y: auto;
       z-index: 1040;
     }
+
     .sidebar .close-btn {
       position: absolute;
       top: 12px;
@@ -48,37 +53,44 @@
       cursor: pointer;
       z-index: 1050;
     }
+
     .content {
       margin-left: 250px;
       margin-bottom: 60px;
       padding: 2rem;
+      max-width: 800px;
     }
+
     .accordion-button {
       background-color: #fff !important;
       color: #000;
       border: 1px solid #ddd;
     }
+
     .accordion-button:focus {
       box-shadow: none;
     }
+
     .accordion-button:not(.collapsed) {
       background-color: #e9ecef !important;
       color: #000;
     }
+
     .nav-link {
       padding-left: 1.5rem;
       color: #000;
     }
+
     .nav-link:hover {
       background-color: #e0f7f5;
       color: #000;
     }
+
     .nav-link.active {
       background-color: #d1f0ee;
       font-weight: bold;
     }
 
-    /* Barra inferior fija */
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -90,17 +102,18 @@
       padding: 0.5rem 0;
       z-index: 1050;
     }
+
     .bottom-bar a {
       color: white;
       text-align: center;
       font-size: 0.9rem;
       text-decoration: none;
     }
+
     .bottom-bar a:hover {
       color: #ffd700;
     }
 
-    /* Responsive */
     @media (max-width: 991.98px) {
       .sidebar {
         display: none;
@@ -219,8 +232,10 @@
   </div>
 
   <!-- Contenido principal -->
-  <main class="content">
-    {% block content %}{% endblock %}
+  <main class="content container-fluid px-4">
+    <div class="mx-auto" style="max-width: 800px;">
+      {% block content %}{% endblock %}
+    </div>
   </main>
 
   <!-- Barra inferior fija -->
