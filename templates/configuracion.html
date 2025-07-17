@@ -1,21 +1,35 @@
 {% extends "base.html" %}
 
+{% block title %}Configuración – {{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
+{% block topbar_title %}Configuración{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">⚙️ Configuración actual</h2>
 
-  <!-- Formulario para subir logo -->
   <form action="/configuracion" method="POST" enctype="multipart/form-data" class="mb-4">
+    <!-- Subir logo -->
     <div class="mb-3">
       <label for="logo" class="form-label">Subir logo</label>
       <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
     </div>
-    <button type="submit" class="btn btn-primary">Guardar logo</button>
+
+    <!-- Selector de color principal -->
+    <div class="mb-3">
+      <label for="color_principal" class="form-label">Color principal</label>
+      <input type="color"
+             id="color_principal"
+             name="ColorPrincipal"
+             value="{{ config.get('ColorPrincipal', '#0d6efd') }}"
+             class="form-control form-control-color"
+             title="Elige un color">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
   </form>
 
   <hr>
 
-  <!-- Listado de valores de configuración -->
   <ul class="list-group">
     {% for clave, valor in config.items() %}
       <li class="list-group-item">
