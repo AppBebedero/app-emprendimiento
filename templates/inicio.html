@@ -1,19 +1,17 @@
 {% extends "base.html" %}
+
 {% block title %}Inicio - Party Box{% endblock %}
 {% block topbar_title %}Party Box{% endblock %}
 
 {% block content %}
-<style>
-  .imagen-inicio {
-    background-image: url('{{ url_for('static', filename='Inicio.png') }}');
-    background-size: contain;
-    background-position: top center;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: calc(100vh - 120px); /* visible entre topbar y bottombar */
-  }
-</style>
+  {% if logo_exists %}
+    <div class="text-center my-4">
+      <img src="{{ logo_url }}" alt="Logo" class="img-fluid">
+    </div>
+  {% endif %}
 
-<div class="imagen-inicio"></div>
+  <!-- Aquí irán tus indicadores clave -->
+  <div class="row">
+    <!-- p.ej. saldo de caja, total ventas, cuentas pendientes... -->
+  </div>
 {% endblock %}
-
