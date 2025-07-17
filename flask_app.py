@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, jsonify
-from config_loader import cargar_configuracion
-import pandas as pd
+from flask import Flask, render_template, request, jsonify, redirect
 import requests
 import os
 import csv
+from config_loader import cargar_configuracion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave-secreta'
+
+# Cargar configuración una sola vez al iniciar la app
+config = cargar_configuracion()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -21,18 +23,13 @@ def leer_csv_como_diccionario(ruta_csv):
 def leer_lista_simple(ruta_csv):
     try:
         with open(ruta_csv, newline='', encoding='utf-8') as f:
-            return [fila[0] for fila in csv.reader(f) if fila and fila[0].strip() and fila[0] != 'Seleccione uno']
+            return [fila[0] for fila in csv.reader(f)
+                    if fila and fila[0].strip() and fila[0] != 'Seleccione uno']
     except:
         return []
 
-@app.route('/')
-def inicio():
-    config = cargar_configuracion()
-    return render_template('inicio.html', config=config)
-
 @app.route('/compras', methods=['GET', 'POST'])
 def compras():
-    config = cargar_configuracion()
     if request.method == 'POST':
         try:
             data = request.form
@@ -43,33 +40,40 @@ def compras():
                 'Producto': data['Producto'],
                 'Cantidad': data['Cantidad'],
                 'PrecioUnitario': data['PrecioUnitario'],
-                'Moneda': data['Moneda'],
+                'Moneda': config.get('Moneda', ''),
                 'Total': str(float(data['Cantidad']) * float(data['PrecioUnitario'])),
                 'Forma_Pago': data['Forma_Pago'],
-                'Observaciones': data['Observaciones']
+                'Observaciones': data['Observaciones'],
+                'tipo': 'compras'
             }
 
             # Guardar en CSV local
             ruta = os.path.join(DATA_DIR, 'compras.csv')
-            archivo_nuevo = not os.path.exists(ruta)
+            nuevo_archivo = not os.path.exists(ruta)
             with open(ruta, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=datos.keys())
-                if archivo_nuevo:
+                if nuevo_archivo:
                     writer.writeheader()
                 writer.writerow(datos)
 
-            # Enviar a Google Sheets en formato JSON
-            url = config.get('URLScript', '')
-            respuesta = requests.post(url, json=datos)
-            print("📥 Respuesta Google:", respuesta.text)
+            # Envío a Google Sheets vía Apps Script
+            url_compras = config.get('URLScript')
+            if url_compras:
+                r = requests.post(url_compras, json=datos)
+                print("📥 Respuesta Google:", r.text)
 
             return jsonify({'mensaje': 'Guardado correctamente'}), 200
         except Exception as e:
             print("❌ Error en /compras:", e)
             return jsonify({'error': 'Error interno'}), 500
 
+    # Formas de pago y moneda desde config
     formas_pago = ["Efectivo", "SINPE", "Tarjeta Cr."]
-    return render_template('compras.html', formas_pago=formas_pago)
+    moneda = config.get('Moneda', '')
+    return render_template('compras.html',
+                           formas_pago=formas_pago,
+                           moneda=moneda,
+                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
 
 @app.route('/datos_formulario')
 def datos_formulario():
@@ -89,7 +93,6 @@ def datos_formulario():
 
 @app.route('/nuevo_proveedor', methods=['POST'])
 def nuevo_proveedor():
-    config = cargar_configuracion()
     try:
         data = request.form
         nombre = data.get('nombre', '').strip()
@@ -109,20 +112,22 @@ def nuevo_proveedor():
             'Email': data.get('email', ''),
             'Contacto': data.get('contacto', ''),
             'Celular': data.get('celular', ''),
-            'Tipo de Negocio': tipo,
-            'Observaciones': data.get('observaciones', '')
+            'Tipo_de_Negocio': tipo,
+            'Observaciones': data.get('observaciones', ''),
+            'tipo': 'proveedor'
         }
 
-        archivo_nuevo = not os.path.exists(ruta)
+        nuevo_archivo = not os.path.exists(ruta)
         with open(ruta, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=nuevo.keys())
-            if archivo_nuevo:
+            if nuevo_archivo:
                 writer.writeheader()
             writer.writerow(nuevo)
 
-        url = config.get('URLScriptProveedores', '')
-        respuesta = requests.post(url, json=nuevo)
-        print("📥 Respuesta proveedor:", respuesta.text)
+        url_prov = config.get('URLScriptProveedores')
+        if url_prov:
+            r = requests.post(url_prov, json=nuevo)
+            print("📥 Respuesta proveedor:", r.text)
 
         return jsonify({'mensaje': 'Proveedor guardado'}), 200
     except Exception as e:
@@ -131,7 +136,6 @@ def nuevo_proveedor():
 
 @app.route('/nuevo_producto', methods=['POST'])
 def nuevo_producto():
-    config = cargar_configuracion()
     try:
         data = request.form
         nombre = data.get('nombre', '').strip()
@@ -149,24 +153,42 @@ def nuevo_producto():
             'Proveedor': data.get('proveedor', ''),
             'Categoría': data.get('categoria', ''),
             'Unidad': data.get('unidad', ''),
-            'Observaciones': data.get('observaciones', '')
+            'Observaciones': data.get('observaciones', ''),
+            'tipo': 'producto'
         }
 
-        archivo_nuevo = not os.path.exists(ruta)
+        nuevo_archivo = not os.path.exists(ruta)
         with open(ruta, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=nuevo.keys())
-            if archivo_nuevo:
+            if nuevo_archivo:
                 writer.writeheader()
             writer.writerow(nuevo)
 
-        url = config.get('URLScriptProductos', '')
-        respuesta = requests.post(url, json=nuevo)
-        print("📥 Respuesta producto:", respuesta.text)
+        url_prod = config.get('URLScriptProductos')
+        if url_prod:
+            r = requests.post(url_prod, json=nuevo)
+            print("📥 Respuesta producto:", r.text)
 
         return jsonify({'mensaje': 'Producto guardado'}), 200
     except Exception as e:
         print("❌ Error en nuevo_producto:", e)
         return jsonify({'error': 'Error interno'}), 500
+
+# Rutas para mantenimiento independiente de Proveedores y Productos
+
+@app.route('/proveedores')
+def proveedores():
+    proveedores = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv'))
+    return render_template('proveedores.html',
+                           proveedores=proveedores,
+                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
+
+@app.route('/productos')
+def productos():
+    productos = leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv'))
+    return render_template('productos.html',
+                           productos=productos,
+                           color_principal=config.get('ColorPrincipal', '#0d6efd'))
 
 if __name__ == '__main__':
     app.run(debug=True)
