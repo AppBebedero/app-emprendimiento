@@ -22,26 +22,27 @@ os.makedirs(STATIC_IMG_DIR, exist_ok=True)
 # Cargar configuración inicial desde Google Sheets
 config = cargar_configuracion()
 
-# Cargar overrides locales (logo + color)
+# Cargar overrides locales (logo + color principal + color fondo)
 overrides = {}
 if os.path.exists(OVERRIDE_PATH):
     with open(OVERRIDE_PATH, 'r', encoding='utf-8') as f:
         overrides = json.load(f)
 config.update(overrides)
 
-# Función para validar extensiones de logo
+# Validar extensiones de imagen
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Inyectar variables globales en todas las plantillas
+# Inyectar variables globales en las plantillas
 @app.context_processor
 def inject_globals():
     logo_path = os.path.join(STATIC_IMG_DIR, 'logo.png')
     return {
         'logo_exists': os.path.exists(logo_path),
         'logo_url': url_for('static', filename='img/logo.png'),
-        'color_principal': config.get('ColorPrincipal', '#0d6efd')
+        'color_principal': config.get('ColorPrincipal', '#0d6efd'),
+        'color_fondo': config.get('ColorFondo', '#ffffff')
     }
 
 def leer_csv_como_diccionario(ruta_csv):
@@ -55,8 +56,7 @@ def leer_lista_simple(ruta_csv):
     try:
         with open(ruta_csv, newline='', encoding='utf-8') as f:
             return [
-                fila[0]
-                for fila in csv.reader(f)
+                fila[0] for fila in csv.reader(f)
                 if fila and fila[0].strip() and fila[0] != 'Seleccione uno'
             ]
     except:
@@ -69,24 +69,32 @@ def inicio():
 @app.route('/configuracion', methods=['GET', 'POST'])
 def configuracion():
     if request.method == 'POST':
-        # --- Subida de logo ---
+        # 1) Subida de logo
         file = request.files.get('logo')
         if file and allowed_file(file.filename):
             ext = os.path.splitext(file.filename)[1]
             filename = secure_filename('logo' + ext)
             dest = os.path.join(STATIC_IMG_DIR, filename)
             file.save(dest)
-            # Siempre dejarlo como logo.png
+            # Normalizar a logo.png
             if ext.lower() != '.png':
                 os.replace(dest, os.path.join(STATIC_IMG_DIR, 'logo.png'))
 
-        # --- Cambio de color principal ---
+        # 2) Cambio de color principal
         nuevo_color = request.form.get('ColorPrincipal')
         if nuevo_color:
             overrides['ColorPrincipal'] = nuevo_color
-            with open(OVERRIDE_PATH, 'w', encoding='utf-8') as f:
-                json.dump(overrides, f)
             config['ColorPrincipal'] = nuevo_color
+
+        # 3) Cambio de color de fondo
+        nuevo_fondo = request.form.get('ColorFondo')
+        if nuevo_fondo:
+            overrides['ColorFondo'] = nuevo_fondo
+            config['ColorFondo'] = nuevo_fondo
+
+        # Guardar overrides en archivo
+        with open(OVERRIDE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(overrides, f)
 
         return redirect(url_for('configuracion'))
 
@@ -111,7 +119,6 @@ def compras():
                 'tipo': 'compras'
             }
 
-            # Guardar en CSV local
             ruta = os.path.join(DATA_DIR, 'compras.csv')
             nuevo_archivo = not os.path.exists(ruta)
             with open(ruta, 'a', newline='', encoding='utf-8') as f:
@@ -120,7 +127,6 @@ def compras():
                     writer.writeheader()
                 writer.writerow(datos)
 
-            # Envío a Google Sheets
             url_compras = config.get('URLScript')
             if url_compras:
                 r = requests.post(url_compras, json=datos)
@@ -154,7 +160,6 @@ def nuevo_proveedor():
         data = request.form
         nombre = data.get('nombre', '').strip()
         tipo = data.get('tipo_negocio', '').strip()
-
         if not nombre or not tipo:
             return jsonify({'error': 'Nombre y tipo de negocio son obligatorios'}), 400
 
@@ -196,7 +201,6 @@ def nuevo_producto():
     try:
         data = request.form
         nombre = data.get('nombre', '').strip()
-
         if not nombre:
             return jsonify({'error': 'Nombre es obligatorio'}), 400
 
