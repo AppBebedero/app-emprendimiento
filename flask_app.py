@@ -59,7 +59,6 @@ def inicio():
 @app.route('/configuracion', methods=['GET', 'POST'])
 def configuracion():
     if request.method == 'POST':
-        # Subir logo
         file = request.files.get('logo')
         if file and allowed_file(file.filename):
             ext = os.path.splitext(file.filename)[1]
@@ -73,11 +72,9 @@ def configuracion():
         else:
             logo_url = config.get('LogoURL', '')
 
-        # Leer colores
         cp = request.form.get('ColorPrincipal')
         cf = request.form.get('ColorFondo')
 
-        # Enviar a Apps Script
         script = config.get('URLScriptConfig')
         if script:
             for clave, valor in [
@@ -132,7 +129,7 @@ def compras():
 @app.route('/datos_formulario')
 def datos_formulario():
     return jsonify({
-        'proveedores': leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv')),
+        'proveedores': [p for p in leer_csv_como_diccionario(os.path.join(DATA_DIR, 'proveedores.csv')) if p.get('Nombre')],
         'productos': leer_csv_como_diccionario(os.path.join(DATA_DIR, 'productos.csv')),
         'tipos_negocio': leer_lista_simple(os.path.join(DATA_DIR, 'tipos_negocio.csv')),
         'categorias': leer_lista_simple(os.path.join(DATA_DIR, 'categorias.csv')),
