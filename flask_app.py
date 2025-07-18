@@ -45,8 +45,8 @@ def leer_csv_como_diccionario(path):
 def leer_lista_simple(path):
     try:
         with open(path, newline='', encoding='utf-8') as f:
-            return [r[0] for r in csv.reader(f)
-                    if r and r[0].strip() and r[0] != 'Seleccione uno']
+            return [str(r[0]).strip() for r in csv.reader(f)
+                    if r and isinstance(r[0], str) and r[0].strip()]
     except:
         return []
 
