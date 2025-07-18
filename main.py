@@ -9,12 +9,21 @@ app = Flask(__name__)
 
 # Registrar blueprints
 app.register_blueprint(inicio_bp)
-app.register_blueprint(compras_bp, url_prefix='/compras')  # ← Esta línea es clave
+app.register_blueprint(compras_bp, url_prefix='/compras')
 
 @app.route('/')
 def index():
     config = cargar_configuracion()
-    return render_template('inicio.html', config=config)
+
+    return render_template(
+        'inicio.html',
+        config=config,
+        nombre_negocio=config.get("NombreNegocio", "Sistema Gestión Financiera"),
+        logo_exists=bool(config.get("LogoURL")),
+        logo_url=config.get("LogoURL", ""),
+        color_principal=config.get("ColorPrincipal", "#0d6efd"),
+        color_fondo=config.get("ColorFondo", "#f8f9fa")
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
