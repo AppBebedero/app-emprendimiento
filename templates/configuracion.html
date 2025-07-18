@@ -1,52 +1,73 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Configuración – {{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
-{% block topbar_title %}Configuración{% endblock %}
+{% block title %}Configuración del sistema{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">⚙️ Configuración actual</h2>
+<h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Configuración del Sistema</h3>
 
-  <form action="/configuracion" method="POST" enctype="multipart/form-data" class="mb-4">
-    <!-- Subir logo -->
-    <div class="mb-3">
-      <label for="logo" class="form-label">Subir logo</label>
-      <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
-    </div>
+<form id="configForm">
+  <div class="mb-3">
+    <label for="nombreNegocio" class="form-label"><i class="bi bi-shop me-1"></i>Nombre del negocio</label>
+    <input type="text" class="form-control" id="nombreNegocio" name="NombreNegocio" value="{{ config.get('NombreNegocio', '') }}" required>
+  </div>
 
-    <!-- Color de las barras -->
-    <div class="mb-3">
-      <label for="color_principal" class="form-label">Color principal</label>
-      <input type="color"
-             id="color_principal"
-             name="ColorPrincipal"
-             value="{{ config.get('ColorPrincipal', '#0d6efd') }}"
-             class="form-control form-control-color"
-             title="Elige un color para las barras">
-    </div>
+  <div class="mb-3">
+    <label for="logoURL" class="form-label"><i class="bi bi-image me-1"></i>URL del logo</label>
+    <input type="url" class="form-control" id="logoURL" name="LogoURL" value="{{ config.get('LogoURL', '') }}">
+  </div>
 
-    <!-- Color de fondo -->
-    <div class="mb-3">
-      <label for="color_fondo" class="form-label">Color de fondo</label>
-      <input type="color"
-             id="color_fondo"
-             name="ColorFondo"
-             value="{{ config.get('ColorFondo', '#ffffff') }}"
-             class="form-control form-control-color"
-             title="Elige un color para el fondo de la página">
-    </div>
+  <div class="mb-3">
+    <label for="colorPrincipal" class="form-label"><i class="bi bi-palette-fill me-1"></i>Color principal</label>
+    <input type="color" class="form-control form-control-color" id="colorPrincipal" name="ColorPrincipal" value="{{ config.get('ColorPrincipal', '#0d6efd') }}">
+  </div>
 
-    <button type="submit" class="btn btn-primary">Guardar cambios</button>
-  </form>
+  <div class="mb-3">
+    <label for="colorFondo" class="form-label"><i class="bi bi-palette me-1"></i>Color de fondo</label>
+    <input type="color" class="form-control form-control-color" id="colorFondo" name="ColorFondo" value="{{ config.get('ColorFondo', '#ffffff') }}">
+  </div>
 
-  <hr>
+  <div class="d-flex justify-content-between mt-4">
+    <a href="/" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</a>
+    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar cambios</button>
+  </div>
+</form>
 
-  <ul class="list-group">
-    {% for clave, valor in config.items() %}
-      <li class="list-group-item">
-        <strong>{{ clave }}:</strong> {{ valor }}
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+<script>
+  document.getElementById('configForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const data = {
+      NombreNegocio: form.NombreNegocio.value,
+      LogoURL: form.LogoURL.value,
+      ColorPrincipal: form.ColorPrincipal.value,
+      ColorFondo: form.ColorFondo.value
+    };
+
+    const boton = form.querySelector('button[type="submit"]');
+    boton.disabled = true;
+    boton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+    try {
+      const response = await fetch("{{ config.get('URLScriptConfig') }}", {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const resultado = await response.text();
+      console.log("Respuesta del servidor:", resultado);
+      alert("Cambios guardados correctamente.");
+      location.reload();
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Ocurrió un error al guardar los cambios.");
+    } finally {
+      boton.disabled = false;
+      boton.innerHTML = '<i class="bi bi-save me-1"></i>Guardar cambios';
+    }
+  });
+</script>
 {% endblock %}
