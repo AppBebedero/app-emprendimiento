@@ -10,9 +10,9 @@ def inicio():
     return render_template(
         'inicio.html',
         config=config,
-        nombre_negocio=config.get("NombreNegocio", "Sistema Gestión Financiera"),
-        logo_exists=bool(config.get("LogoURL")),
+        nombre_negocio=config.get("NombreNegocio", ""),
         logo_url=config.get("LogoURL", ""),
+        logo_exists=bool(config.get("LogoURL")),
         color_principal=config.get("ColorPrincipal", "#0d6efd"),
         color_fondo=config.get("ColorFondo", "#ffffff")
     )
