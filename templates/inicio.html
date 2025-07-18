@@ -3,8 +3,7 @@
 
 {% block content %}
 <div class="container mt-5 text-center">
-  <img src="{{ config.logo }}" alt="Logo" class="img-fluid mb-4" style="max-height: 200px;">
-  <h1 class="mb-3">{{ config.NombreNegocio or 'Bienvenido' }}</h1>
+  <h1 class="mb-3">{{ nombre_negocio or 'Bienvenido' }}</h1>
   <p class="lead">Este sistema le permite gestionar compras, productos, proveedores y mucho más.</p>
 </div>
 {% endblock %}
