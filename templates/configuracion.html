@@ -107,6 +107,9 @@
       const resultado = await response.text();
       console.log("Respuesta:", resultado);
 
+      // ✅ NUEVA LÍNEA PARA MOSTRAR EL ERROR REAL
+      if (!response.ok) throw new Error(resultado);
+
       document.body.style.backgroundColor = data.ColorFondo;
       const top = document.querySelector('.navbar');
       const bot = document.querySelector('.bottom-bar');
@@ -119,7 +122,7 @@
       alert("✅ Cambios guardados correctamente.");
     } catch (error) {
       console.error("Error:", error);
-      alert("❌ Ocurrió un error al guardar.");
+      alert("❌ Ocurrió un error al guardar.\n" + error.message);
     } finally {
       boton.disabled = false;
       boton.innerHTML = '<i class="bi bi-save me-1"></i>Guardar cambios';
