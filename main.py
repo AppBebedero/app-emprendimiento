@@ -2,14 +2,12 @@ from flask import Flask, render_template
 from config_loader import cargar_configuracion
 
 # Importar blueprints
-from modulos.inicio import inicio_bp
 from modulos.compras import compras_bp
 from modulos.configuracion import configuracion_bp
 
 app = Flask(__name__)
 
 # Registrar blueprints
-app.register_blueprint(inicio_bp)
 app.register_blueprint(compras_bp, url_prefix='/compras')
 app.register_blueprint(configuracion_bp)
 
