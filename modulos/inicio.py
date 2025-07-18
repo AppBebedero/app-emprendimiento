@@ -7,8 +7,7 @@ inicio_bp = Blueprint('inicio', __name__)
 @inicio_bp.route('/')
 def inicio():
     config = cargar_configuracion()
-
-    timestamp = str(int(time.time()))  # para evitar caché en el logo
+    timestamp = str(int(time.time()))  # evita caché del logo
 
     logo_url = config.get("LogoURL", "")
     if logo_url:
