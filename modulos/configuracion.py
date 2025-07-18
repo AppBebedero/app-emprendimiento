@@ -14,5 +14,5 @@ def configuracion():
         logo_exists=bool(config.get("LogoURL")),
         logo_url=config.get("LogoURL", ""),
         color_principal=config.get("ColorPrincipal", "#0d6efd"),
-        color_fondo=config.get("ColorFondo", "#f8f9fa")
+        color_fondo=config.get("ColorFondo", "#ffffff")
     )
