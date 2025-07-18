@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block title %}Registrar Compras{% endblock %}
 
@@ -167,124 +168,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const res = await fetch('/datos_formulario');
   const datos = await res.json();
 
-  // Proveedores
   const proveedorSelects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
   proveedorSelects.forEach(select => {
     select.innerHTML = datos.proveedores.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
   });
 
-  // Productos
   document.getElementById('producto').innerHTML =
     datos.productos.map(p => `<option value="${p.Nombre}">${p.Nombre}</option>`).join('');
 
-  // Tipo de Negocio
   document.getElementById('tipo_negocio').innerHTML =
     datos.tipos_negocio.map(t => `<option value="${t}">${t}</option>`).join('');
 
-  // Categorías
   document.getElementById('categoria').innerHTML =
     datos.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
 
-  // Unidades
   document.getElementById('unidad').innerHTML =
     datos.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
 
-  // Máscaras
   $('#telefono').inputmask('9999-9999');
   $('#celular').inputmask('9999-9999');
-});
 
-// Envío de formulario principal
-document.getElementById('form-compras').addEventListener('submit', async e => {
-  e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-  const mensaje = document.getElementById('mensajeCompra');
-  const btn = document.getElementById('btnGuardarCompra');
-
-  mensaje.innerHTML = '<span class="text-primary">Guardando...</span>';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/compras', {
-      method: 'POST',
-      body: data
-    });
-
-    if (res.ok) {
-      mensaje.innerHTML = '<span class="text-success">✅ Guardado correctamente</span>';
-      form.reset();
-    } else {
-      mensaje.innerHTML = '<span class="text-danger">❌ Error al guardar</span>';
-      console.error(await res.text());
-    }
-  } catch (err) {
-    mensaje.innerHTML = '<span class="text-danger">❌ Error de conexión</span>';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// Modal: Guardar nuevo proveedor
-document.getElementById('formProveedor').addEventListener('submit', async e => {
-  e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-  const error = document.getElementById('errorProveedor');
-
-  error.textContent = 'Guardando...';
-
-  try {
-    const res = await fetch('/nuevo_proveedor', {
-      method: 'POST',
-      body: data
-    });
-    const result = await res.json();
-
-    if (res.ok) {
-      const nuevo = data.get('nombre');
-      const selects = [document.getElementById('proveedor'), document.getElementById('producto_proveedor')];
-      selects.forEach(s => s.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`));
-      selects.forEach(s => s.value = nuevo);
-      bootstrap.Modal.getInstance(document.getElementById('modalProveedor')).hide();
-    } else {
-      error.textContent = result.error || '❌ Error al guardar';
-    }
-  } catch (err) {
-    error.textContent = '❌ Error de conexión';
-    console.error(err);
-  }
-});
-
-// Modal: Guardar nuevo producto
-document.getElementById('formProducto').addEventListener('submit', async e => {
-  e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-  const error = document.getElementById('errorProducto');
-
-  error.textContent = 'Guardando...';
-
-  try {
-    const res = await fetch('/nuevo_producto', {
-      method: 'POST',
-      body: data
-    });
-    const result = await res.json();
-
-    if (res.ok) {
-      const nuevo = data.get('nombre');
-      const select = document.getElementById('producto');
-      select.insertAdjacentHTML('beforeend', `<option value="${nuevo}">${nuevo}</option>`);
-      select.value = nuevo;
-      bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
-    } else {
-      error.textContent = result.error || '❌ Error al guardar';
-    }
-  } catch (err) {
-    error.textContent = '❌ Error de conexión';
-    console.error(err);
+  // Si se llegó a esta vista desde el menú 'Proveedores', abrir modal
+  const hash = window.location.hash;
+  if (hash === '#proveedores') {
+    abrirModalProveedor();
+    history.replaceState(null, null, ' ');
   }
 });
 </script>
