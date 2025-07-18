@@ -1,14 +1,25 @@
-import pandas as pd
+import csv
+import requests
+from io import StringIO
 
 def cargar_configuracion():
-    url_csv = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl81yJ7lo37cETniOOSzLkqwwTB6jeViKi9ebN9GweztKSL8QQ7l05pqm8LwMGMOMR0m5QCCZtOrQL/pub?gid=0&single=true&output=csv'
-    df = pd.read_csv(url_csv)
-    config = {}
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTIKxEMh8W7RRoqpqkaCF4ZIMDLFc-Nf7U9kLuKXx2pWqQeEGqljcTgF__mqO0lgGbMGrps-t90WrOr/pub?gid=2133313737&single=true&output=csv"
 
-    for _, fila in df.iterrows():
-        clave = str(fila['Clave']).strip()
-        valor = str(fila['Valor']).strip()
-        config[clave] = valor
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        contenido = response.content.decode('utf-8')
+        lector = csv.reader(StringIO(contenido))
+        datos = list(lector)
 
-    return config
+        config = {}
+        for fila in datos:
+            if len(fila) >= 2:
+                clave = fila[0].strip()
+                valor = fila[1].strip()
+                config[clave] = valor
+        return config
 
+    except Exception as e:
+        print("Error cargando configuración:", e)
+        return {}
