@@ -42,40 +42,20 @@
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = async function () {
+    reader.onloadend = function () {
       const base64 = reader.result.split(',')[1];
+      localStorage.setItem("logoBase64", base64);
+      document.getElementById('logoPreview').src = reader.result;
 
-      const formData = new FormData();
-      formData.append('imagen', base64);
-      formData.append('nombre', file.name);
-      formData.append('tipo', file.type);
-
-      try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbwMJmLtiv2cCtp2Qd8EqfERtZp-962oF8xTAMOXdJ-U3k1aa7oVYXcROMclP6UV9OQ/exec", {
-          method: 'POST',
-          body: formData
-        });
-
-        const respuesta = await response.text();
-        const urlMatch = respuesta.match(/https?:\/\/[^\s]+/);
-        if (urlMatch) {
-          logoURL = urlMatch[0];
-          document.getElementById('logoPreview').src = logoURL;
-
-          const img = document.querySelector('.navbar-brand img');
-          if (img) {
-            img.src = logoURL;
-          } else {
-            const logoImg = document.createElement('img');
-            logoImg.src = logoURL;
-            logoImg.style.height = "30px";
-            logoImg.style.marginRight = "0.5rem";
-            document.querySelector('.navbar-brand').prepend(logoImg);
-          }
-        }
-      } catch (err) {
-        alert("❌ No se pudo subir el logo.");
-        console.error(err);
+      const img = document.querySelector('.navbar-brand img');
+      if (img) {
+        img.src = reader.result;
+      } else {
+        const logoImg = document.createElement('img');
+        logoImg.src = reader.result;
+        logoImg.style.height = "30px";
+        logoImg.style.marginRight = "0.5rem";
+        document.querySelector('.navbar-brand').prepend(logoImg);
       }
     };
     reader.readAsDataURL(file);
@@ -87,7 +67,7 @@
     const form = e.target;
     const data = {
       NombreNegocio: form.NombreNegocio.value,
-      LogoURL: logoURL,
+      LogoBase64: localStorage.getItem("logoBase64") || "",
       ColorPrincipal: form.ColorPrincipal.value,
       ColorFondo: form.ColorFondo.value
     };
@@ -107,7 +87,6 @@
 
       const resultado = await response.text();
       console.log("Respuesta:", resultado);
-
       if (!response.ok) throw new Error(resultado);
 
       document.body.style.backgroundColor = data.ColorFondo;
@@ -120,6 +99,7 @@
       if (nombreSpan) nombreSpan.textContent = data.NombreNegocio;
 
       alert("✅ Cambios guardados correctamente.");
+      localStorage.removeItem("logoBase64");
     } catch (error) {
       console.error("Error:", error);
       alert("❌ Ocurrió un error al guardar.\n" + error.message);
