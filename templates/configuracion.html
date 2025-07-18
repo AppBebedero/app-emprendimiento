@@ -59,8 +59,37 @@
 
       const resultado = await response.text();
       console.log("Respuesta del servidor:", resultado);
+
+      // ✅ Actualizar la apariencia sin recargar
+      document.body.style.backgroundColor = data.ColorFondo;
+
+      const navbar = document.querySelector('.navbar');
+      if (navbar) navbar.style.backgroundColor = data.ColorPrincipal;
+
+      const bottomBar = document.querySelector('.bottom-bar');
+      if (bottomBar) bottomBar.style.backgroundColor = data.ColorPrincipal;
+
+      const brandTitle = document.querySelector('.navbar-brand');
+      if (brandTitle) {
+        const img = brandTitle.querySelector('img');
+        if (img && data.LogoURL.trim()) {
+          img.src = data.LogoURL;
+        } else if (data.LogoURL.trim()) {
+          const newImg = document.createElement('img');
+          newImg.src = data.LogoURL;
+          newImg.alt = "Logo";
+          newImg.style.height = "30px";
+          newImg.style.marginRight = "0.5rem";
+          brandTitle.prepend(newImg);
+        }
+
+        // Cambiar el texto del negocio (elimina todo menos imagen)
+        const spanText = brandTitle.querySelector('span') || document.createElement('span');
+        spanText.textContent = data.NombreNegocio;
+        if (!brandTitle.contains(spanText)) brandTitle.appendChild(spanText);
+      }
+
       alert("Cambios guardados correctamente.");
-      location.reload();
     } catch (error) {
       console.error("Error al guardar:", error);
       alert("Ocurrió un error al guardar los cambios.");
