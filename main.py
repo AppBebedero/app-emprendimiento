@@ -1,22 +1,22 @@
-from flask import Flask
+from flask import Flask, render_template
 from config_loader import cargar_configuracion
-from modulos.inicio import inicio_bp
 
-# Crear la app
+# Importar blueprints
+from modulos.compras.compras import compras_bp
+from modulos.compras.inicio import inicio_bp
+
 app = Flask(__name__)
-app.secret_key = "clave-secreta"
 
-# Cargar configuración global
-config = cargar_configuracion()
-
-# Registrar Blueprints (módulos)
+# Registrar blueprints
 app.register_blueprint(inicio_bp)
+app.register_blueprint(compras_bp)
 
-# Ruta raíz (redirige a Inicio)
+# Ruta principal
 @app.route('/')
 def index():
-    return inicio_bp.send_static_file('index.html')
+    config = cargar_configuracion()
+    return render_template('inicio.html', config=config)
 
-# Ejecutar app
+# Ejecutar la app si se corre localmente
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=10000)
+    app.run(debug=True)
