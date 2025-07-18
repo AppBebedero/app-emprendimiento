@@ -1,20 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Inicio – {{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
-{% block topbar_title %}{{ config.get('NombreNegocio', 'Sistema Gestión Financiera') }}{% endblock %}
+{% block title %}Inicio{% endblock %}
 
 {% block content %}
-  {% if logo_exists %}
-    <div class="text-center my-4">
-      <img src="{{ logo_url }}" alt="{{ config.get('NombreNegocio') }}" class="img-fluid">
-    </div>
-  {% endif %}
-
-  <!-- Aquí van tus indicadores clave -->
-  <div class="row">
-    <!-- Ejemplo:
-    <div class="col">
-      <div class="card p-3">Saldo de caja: {{ saldo_caja }}</div>
-    </div>
-    -->
-  </div>
+<div class="container mt-5 text-center">
+  <img src="{{ config.logo }}" alt="Logo" class="img-fluid mb-4" style="max-height: 200px;">
+  <h1 class="mb-3">{{ config.NombreNegocio or 'Bienvenido' }}</h1>
+  <p class="lead">Este sistema le permite gestionar compras, productos, proveedores y mucho más.</p>
+</div>
 {% endblock %}
+
