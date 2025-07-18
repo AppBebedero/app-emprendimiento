@@ -12,8 +12,9 @@
   </div>
 
   <div class="mb-3">
-    <label for="logoURL" class="form-label"><i class="bi bi-image me-1"></i>URL del logo</label>
-    <input type="url" class="form-control" id="logoURL" name="LogoURL" value="{{ config.get('LogoURL', '') }}">
+    <label for="logoFile" class="form-label"><i class="bi bi-image me-1"></i>Logo del negocio</label>
+    <input type="file" class="form-control" id="logoFile" accept="image/*">
+    <img id="logoPreview" src="{{ config.get('LogoURL', '') }}" alt="Logo actual" style="max-height:100px; margin-top:10px;">
   </div>
 
   <div class="mb-3">
@@ -33,13 +34,60 @@
 </form>
 
 <script>
+  let logoURL = "{{ config.get('LogoURL', '') }}";
+
+  document.getElementById('logoFile').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async function () {
+      const base64 = reader.result.split(',')[1];
+
+      const formData = new FormData();
+      formData.append('imagen', base64);
+      formData.append('nombre', file.name);
+      formData.append('tipo', file.type);
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwMJmLtiv2cCtp2Qd8EqfERtZp-962oF8xTAMOXdJ-U3k1aa7oVYXcROMclP6UV9OQ/exec", {
+          method: 'POST',
+          body: formData
+        });
+
+        const respuesta = await response.text();
+        const urlMatch = respuesta.match(/https?:\/\/[^\s]+/);
+        if (urlMatch) {
+          logoURL = urlMatch[0];
+          document.getElementById('logoPreview').src = logoURL;
+
+          // actualizar visualmente en topbar
+          const img = document.querySelector('.navbar-brand img');
+          if (img) {
+            img.src = logoURL;
+          } else {
+            const logoImg = document.createElement('img');
+            logoImg.src = logoURL;
+            logoImg.style.height = "30px";
+            logoImg.style.marginRight = "0.5rem";
+            document.querySelector('.navbar-brand').prepend(logoImg);
+          }
+        }
+      } catch (err) {
+        alert("❌ No se pudo subir el logo.");
+        console.error(err);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
   document.getElementById('configForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const form = e.target;
     const data = {
       NombreNegocio: form.NombreNegocio.value,
-      LogoURL: form.LogoURL.value,
+      LogoURL: logoURL,
       ColorPrincipal: form.ColorPrincipal.value,
       ColorFondo: form.ColorFondo.value
     };
@@ -58,41 +106,22 @@
       });
 
       const resultado = await response.text();
-      console.log("Respuesta del servidor:", resultado);
+      console.log("Respuesta:", resultado);
 
-      // ✅ Actualizar la apariencia sin recargar
+      // Aplicar colores y nombre visualmente
       document.body.style.backgroundColor = data.ColorFondo;
+      const top = document.querySelector('.navbar');
+      const bot = document.querySelector('.bottom-bar');
+      if (top) top.style.backgroundColor = data.ColorPrincipal;
+      if (bot) bot.style.backgroundColor = data.ColorPrincipal;
 
-      const navbar = document.querySelector('.navbar');
-      if (navbar) navbar.style.backgroundColor = data.ColorPrincipal;
+      const nombreSpan = document.querySelector('.navbar-brand span');
+      if (nombreSpan) nombreSpan.textContent = data.NombreNegocio;
 
-      const bottomBar = document.querySelector('.bottom-bar');
-      if (bottomBar) bottomBar.style.backgroundColor = data.ColorPrincipal;
-
-      const brandTitle = document.querySelector('.navbar-brand');
-      if (brandTitle) {
-        const img = brandTitle.querySelector('img');
-        if (img && data.LogoURL.trim()) {
-          img.src = data.LogoURL;
-        } else if (data.LogoURL.trim()) {
-          const newImg = document.createElement('img');
-          newImg.src = data.LogoURL;
-          newImg.alt = "Logo";
-          newImg.style.height = "30px";
-          newImg.style.marginRight = "0.5rem";
-          brandTitle.prepend(newImg);
-        }
-
-        // Cambiar el texto del negocio (elimina todo menos imagen)
-        const spanText = brandTitle.querySelector('span') || document.createElement('span');
-        spanText.textContent = data.NombreNegocio;
-        if (!brandTitle.contains(spanText)) brandTitle.appendChild(spanText);
-      }
-
-      alert("Cambios guardados correctamente.");
+      alert("✅ Cambios guardados correctamente.");
     } catch (error) {
-      console.error("Error al guardar:", error);
-      alert("Ocurrió un error al guardar los cambios.");
+      console.error("Error:", error);
+      alert("❌ Ocurrió un error al guardar.");
     } finally {
       boton.disabled = false;
       boton.innerHTML = '<i class="bi bi-save me-1"></i>Guardar cambios';
