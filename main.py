@@ -3,7 +3,7 @@ from config_loader import cargar_configuracion
 
 # Importar blueprints
 from modulos.compras import compras_bp
-from modulos.compras.inicio import inicio_bp  # Este depende de si inicio.py existe y tiene un blueprint válido
+from modulos.inicio import inicio_bp  # ← corregido: estaba mal apuntado
 
 app = Flask(__name__)
 
