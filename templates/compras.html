@@ -79,7 +79,7 @@
 <script>
 async function cargarDatosFormulario() {
   try {
-    const res = await fetch('/datos_formulario');
+    const res = await fetch('/compras/datos_formulario');
     const data = await res.json();
 
     if (data.error) throw new Error(data.error);
@@ -130,7 +130,6 @@ document.getElementById("form-compras").addEventListener("submit", async functio
 window.onload = cargarDatosFormulario;
 
 function abrirModalProveedor() {
-  // Aquí se puede llamar al modal de nuevo proveedor si lo activás
   alert("Modal proveedor no implementado en esta vista aún.");
 }
 
