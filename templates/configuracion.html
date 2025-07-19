@@ -5,7 +5,7 @@
 <div class="card shadow p-4">
   <h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Configuración del Sistema</h3>
 
-  <form id="configForm">
+  <form id="configForm" method="POST" enctype="multipart/form-data">
     <div class="mb-3">
       <label for="nombreNegocio" class="form-label">
         <i class="bi bi-shop me-1"></i>Nombre del negocio
@@ -18,7 +18,7 @@
       <label for="logoFile" class="form-label">
         <i class="bi bi-image me-1"></i>Logo del negocio
       </label>
-      <input type="file" class="form-control" id="logoFile" accept="image/*">
+      <input type="file" class="form-control" id="logoFile" name="LogoArchivo" accept="image/*">
       <div class="mt-2">
         {% if logo_exists %}
           <img src="{{ logo_url }}" alt="Logo actual" style="height:80px;">
@@ -62,13 +62,12 @@ document.getElementById('configForm').addEventListener('submit', async e => {
   data.append('ColorPrincipal', form.ColorPrincipal.value);
   data.append('ColorFondo', form.ColorFondo.value);
   if (document.getElementById('logoFile').files[0]) {
-    data.append('logo', document.getElementById('logoFile').files[0]);
+    data.append('LogoArchivo', document.getElementById('logoFile').files[0]);
   }
 
   try {
-    const response = await fetch('{{ config.get("URLScriptConfig","") }}', {
+    const response = await fetch('/configuracion', {
       method: 'POST',
-      mode: 'cors',
       body: data
     });
     if (!response.ok) throw new Error(response.statusText);
