@@ -4,6 +4,7 @@ from modulos.core.routes import core_bp
 from modulos.compras.routes import compras_bp
 from modulos.proveedores.routes import proveedores_bp
 from modulos.productos.routes import productos_bp
+from modulos.contabilidad import Accounting  # ← Importa aquí
 
 def create_app():
     app = Flask(__name__)
@@ -22,6 +23,9 @@ def create_app():
             color_principal  = config.get('ColorPrincipal', '#0d6efd'),
             color_fondo      = config.get('ColorFondo', '#ffffff')
         )
+
+    # Instancio el módulo contable y lo guardo en la app
+    app.accounting = Accounting()
 
     # Registro de blueprints
     app.register_blueprint(core_bp)
