@@ -1,3 +1,4 @@
+# main.py
 from flask import Flask
 from config_loader import cargar_configuracion
 from modulos.core.routes import core_bp
@@ -9,21 +10,30 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'cambia-esta-clave-segura'
 
-    # Cargo la configuración (una sola vez por petición)
+    # Cargo configuración
     config = cargar_configuracion()
 
+    # Inyecto las claves que usa base.html
     @app.context_processor
     def inject_config():
-        return dict(config=config)
+        return dict(
+            nombre_negocio   = config.get('NombreNegocio', ''),
+            logo_exists      = bool(config.get('LogoURL')),
+            logo_url         = config.get('LogoURL', ''),
+            color_principal  = config.get('ColorPrincipal', '#0d6efd'),
+            color_fondo      = config.get('ColorFondo', '#ffffff')
+        )
 
-    # Registro de módulos (blueprints)
+    # Registro de blueprints
     app.register_blueprint(core_bp)
-    app.register_blueprint(compras_bp, url_prefix='/compras')
+    app.register_blueprint(compras_bp,    url_prefix='/compras')
     app.register_blueprint(proveedores_bp, url_prefix='/proveedores')
-    app.register_blueprint(productos_bp, url_prefix='/productos')
+    app.register_blueprint(productos_bp,   url_prefix='/productos')
 
     return app
 
+# PARA RENDER/GUNICORN: expongo siempre `app`
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True)
