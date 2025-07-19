@@ -72,7 +72,8 @@ document.getElementById('configForm').addEventListener('submit', async e => {
     });
     if (!response.ok) throw new Error(response.statusText);
     alert('✅ Configuración actualizada con éxito');
-    window.location.reload();
+    // Redirigir al menú de inicio
+    window.location.href = '/';
   } catch (err) {
     console.error(err);
     alert('❌ Ocurrió un error al guardar: ' + err.message);
