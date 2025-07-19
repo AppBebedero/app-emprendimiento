@@ -1,112 +1,86 @@
 {% extends 'base.html' %}
-
 {% block title %}Configuración del sistema{% endblock %}
 
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Configuración del Sistema</h3>
+<div class="card shadow p-4">
+  <h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Configuración del Sistema</h3>
 
-<form id="configForm">
-  <div class="mb-3">
-    <label for="nombreNegocio" class="form-label"><i class="bi bi-shop me-1"></i>Nombre del negocio</label>
-    <input type="text" class="form-control" id="nombreNegocio" name="NombreNegocio" value="{{ config.get('NombreNegocio', '') }}" required>
-  </div>
+  <form id="configForm">
+    <div class="mb-3">
+      <label for="nombreNegocio" class="form-label">
+        <i class="bi bi-shop me-1"></i>Nombre del negocio
+      </label>
+      <input type="text" class="form-control" id="nombreNegocio" name="NombreNegocio"
+             value="{{ config.get('NombreNegocio','') }}" required>
+    </div>
 
-  <div class="mb-3">
-    <label for="logoFile" class="form-label"><i class="bi bi-image me-1"></i>Logo del negocio</label>
-    <input type="file" class="form-control" id="logoFile" accept="image/*">
-    <img id="logoPreview" src="{{ config.get('LogoURL', '') }}" alt="Logo actual" style="max-height:100px; margin-top:10px;">
-  </div>
+    <div class="mb-3">
+      <label for="logoFile" class="form-label">
+        <i class="bi bi-image me-1"></i>Logo del negocio
+      </label>
+      <input type="file" class="form-control" id="logoFile" accept="image/*">
+      <div class="mt-2">
+        {% if logo_exists %}
+          <img src="{{ logo_url }}" alt="Logo actual" style="height:80px;">
+        {% endif %}
+      </div>
+    </div>
 
-  <div class="mb-3">
-    <label for="colorPrincipal" class="form-label"><i class="bi bi-palette-fill me-1"></i>Color principal</label>
-    <input type="color" class="form-control form-control-color" id="colorPrincipal" name="ColorPrincipal" value="{{ config.get('ColorPrincipal', '#0d6efd') }}">
-  </div>
+    <div class="mb-3">
+      <label class="form-label"><i class="bi bi-palette me-1"></i>Color principal</label>
+      <input type="color" class="form-control form-control-color" id="colorPrincipal"
+             name="ColorPrincipal" value="{{ config.get('ColorPrincipal','#0d6efd') }}">
+    </div>
 
-  <div class="mb-3">
-    <label for="colorFondo" class="form-label"><i class="bi bi-palette me-1"></i>Color de fondo</label>
-    <input type="color" class="form-control form-control-color" id="colorFondo" name="ColorFondo" value="{{ config.get('ColorFondo', '#ffffff') }}">
-  </div>
+    <div class="mb-3">
+      <label class="form-label"><i class="bi bi-brush me-1"></i>Color de fondo</label>
+      <input type="color" class="form-control form-control-color" id="colorFondo"
+             name="ColorFondo" value="{{ config.get('ColorFondo','#ffffff') }}">
+    </div>
 
-  <div class="d-flex justify-content-between mt-4">
-    <a href="/" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</a>
-    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar cambios</button>
-  </div>
-</form>
+    <div class="d-flex justify-content-between">
+      <button type="button" class="btn btn-secondary" onclick="history.back()">
+        <i class="bi bi-x-circle me-1"></i>Cancelar
+      </button>
+      <button type="submit" class="btn btn-success" id="btnGuardar">
+        <i class="bi bi-check-circle me-1"></i>Guardar
+      </button>
+    </div>
+  </form>
+</div>
 
 <script>
-  const urlScriptConfig = "{{ config.get('URLScriptConfig', '') }}";
-  let logoURL = "{{ config.get('LogoURL', '') }}";
+document.getElementById('configForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Guardando...';
 
-  document.getElementById('logoFile').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  const form = e.target;
+  const data = new FormData();
+  data.append('NombreNegocio', form.NombreNegocio.value);
+  data.append('ColorPrincipal', form.ColorPrincipal.value);
+  data.append('ColorFondo', form.ColorFondo.value);
+  if (document.getElementById('logoFile').files[0]) {
+    data.append('logo', document.getElementById('logoFile').files[0]);
+  }
 
-    const reader = new FileReader();
-    reader.onloadend = function () {
-      const base64 = reader.result.split(',')[1];
-      localStorage.setItem("logoBase64", base64);
-      document.getElementById('logoPreview').src = reader.result;
-
-      const img = document.querySelector('.navbar-brand img');
-      if (img) {
-        img.src = reader.result;
-      } else {
-        const logoImg = document.createElement('img');
-        logoImg.src = reader.result;
-        logoImg.style.height = "30px";
-        logoImg.style.marginRight = "0.5rem";
-        document.querySelector('.navbar-brand').prepend(logoImg);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-
-  document.getElementById('configForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const data = {
-      NombreNegocio: form.NombreNegocio.value,
-      LogoBase64: localStorage.getItem("logoBase64") || "",
-      ColorPrincipal: form.ColorPrincipal.value,
-      ColorFondo: form.ColorFondo.value
-    };
-
-    const boton = form.querySelector('button[type="submit"]');
-    boton.disabled = true;
-    boton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
-
-    try {
-      const response = await fetch(urlScriptConfig, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const resultado = await response.text();
-      console.log("Respuesta:", resultado);
-      if (!response.ok) throw new Error(resultado);
-
-      document.body.style.backgroundColor = data.ColorFondo;
-      const top = document.querySelector('.navbar');
-      const bot = document.querySelector('.bottom-bar');
-      if (top) top.style.backgroundColor = data.ColorPrincipal;
-      if (bot) bot.style.backgroundColor = data.ColorPrincipal;
-
-      const nombreSpan = document.querySelector('.navbar-brand span');
-      if (nombreSpan) nombreSpan.textContent = data.NombreNegocio;
-
-      alert("✅ Cambios guardados correctamente.");
-      localStorage.removeItem("logoBase64");
-    } catch (error) {
-      console.error("Error:", error);
-      alert("❌ Ocurrió un error al guardar.\n" + error.message);
-    } finally {
-      boton.disabled = false;
-      boton.innerHTML = '<i class="bi bi-save me-1"></i>Guardar cambios';
-    }
-  });
+  try {
+    const response = await fetch('{{ config.get("URLScriptConfig","") }}', {
+      method: 'POST',
+      mode: 'cors',
+      body: data
+    });
+    if (!response.ok) throw new Error(response.statusText);
+    alert('✅ Configuración actualizada con éxito');
+    window.location.reload();
+  } catch (err) {
+    console.error(err);
+    alert('❌ Ocurrió un error al guardar: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar';
+  }
+});
 </script>
 {% endblock %}
