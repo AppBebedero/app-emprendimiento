@@ -1,4 +1,3 @@
-# main.py
 from flask import Flask
 from config_loader import cargar_configuracion
 from modulos.core.routes import core_bp
@@ -13,7 +12,7 @@ def create_app():
     # Cargo configuración
     config = cargar_configuracion()
 
-    # Inyecto las claves que usa base.html
+    # Inyecto las variables de configuración a todas las plantillas
     @app.context_processor
     def inject_config():
         return dict(
@@ -32,7 +31,7 @@ def create_app():
 
     return app
 
-# PARA RENDER/GUNICORN: expongo siempre `app`
+# Para Render/Gunicorn: exporta siempre `app`
 app = create_app()
 
 if __name__ == '__main__':
