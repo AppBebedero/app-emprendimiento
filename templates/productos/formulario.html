@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Registrar Producto{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+  <div class="card shadow p-4">
+    <h3 class="mb-4 text-center">📦 Nuevo Producto</h3>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info" role="alert">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form id="form-productos" method="POST">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Nombre:</label>
+          <input type="text" name="Nombre" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Categoría:</label>
+          <input type="text" name="Categoría" class="form-control">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Unidad:</label>
+          <input type="text" name="Unidad" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Proveedor:</label>
+          <select name="Proveedor" class="form-select" required>
+            <option value="">Seleccione un proveedor</option>
+            {% for prov in proveedores %}
+              <option value="{{ prov }}">{{ prov }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Observaciones:</label>
+        <textarea name="Observaciones" class="form-control" rows="2"></textarea>
+      </div>
+
+      <div class="text-end mt-4">
+        <a href="/" class="btn btn-danger me-2"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle-fill"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
