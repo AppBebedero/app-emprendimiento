@@ -1,74 +1,29 @@
-from flask import Flask, render_template, request, redirect, jsonify
-import os
-import csv
-import requests
+from flask import Flask
 from config_loader import cargar_configuracion
+from modulos.core.routes import core_bp
+from modulos.compras.routes import compras_bp
+from modulos.proveedores.routes import proveedores_bp
+from modulos.productos.routes import productos_bp
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'cambia-esta-clave-segura'
 
-# Asegurar carpeta local
-os.makedirs("data", exist_ok=True)
-
-@app.route("/")
-def inicio():
-    config = cargar_configuracion()
-    return render_template("inicio.html", config=config)
-
-@app.route("/reportes")
-def reportes():
-    config = cargar_configuracion()
-    return render_template("reportes.html", config=config)
-
-@app.route("/acerca")
-def acerca():
-    config = cargar_configuracion()
-    return render_template("acerca.html", config=config)
-
-@app.route("/manual")
-def manual():
-    config = cargar_configuracion()
-    return render_template("manual.html", config=config)
-
-@app.route("/verificar_clave", methods=["POST"])
-def verificar_clave():
-    clave_ingresada = request.form["clave"]
-    config = cargar_configuracion()
-    clave_correcta = config.get("ClaveAcceso", "")
-    if clave_ingresada == clave_correcta:
-        return redirect("/reportes")
-    return "Clave incorrecta"
-
-@app.route("/configuracion", methods=["GET", "POST"])
-def configuracion():
+    # Cargo la configuración (una sola vez por petición)
     config = cargar_configuracion()
 
-    if request.method == "POST":
-        # 1. Obtener datos del formulario
-        nombre_negocio = request.form.get("nombre_negocio", "")
-        color = request.form.get("color", "")
-        color_fondo = request.form.get("color_fondo", "")
-        logo_base64 = request.form.get("logo_base64", "")
+    @app.context_processor
+    def inject_config():
+        return dict(config=config)
 
-        # 2. Preparar datos a enviar
-        datos = {
-            "NombreNegocio": nombre_negocio,
-            "ColorPrincipal": color,
-            "ColorFondo": color_fondo,
-            "LogoBase64": logo_base64
-        }
+    # Registro de módulos (blueprints)
+    app.register_blueprint(core_bp)
+    app.register_blueprint(compras_bp, url_prefix='/compras')
+    app.register_blueprint(proveedores_bp, url_prefix='/proveedores')
+    app.register_blueprint(productos_bp, url_prefix='/productos')
 
-        # 3. Enviar al Apps Script (URL actualizada)
-        url_script = config.get("URLScriptConfig", "")
-        try:
-            respuesta = requests.post(url_script, json=datos)
-            print("📥 Respuesta del script:", respuesta.text)
-            return jsonify({"mensaje": "Configuración guardada correctamente."})
-        except Exception as e:
-            print("❌ Error al guardar configuración:", e)
-            return jsonify({"error": "Error al guardar configuración."}), 500
+    return app
 
-    # GET
-    return render_template("configuracion.html", config=config)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True)
