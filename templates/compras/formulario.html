@@ -1,8 +1,139 @@
-{% extends 'base.html' %}
-{% block title %}Nueva Compra{% endblock %}
+{% extends "base.html" %}
+{% block title %}Registrar Compra{% endblock %}
 
 {% block content %}
-<form id="compraForm">
-  <!-- Campos: Fecha, Proveedor, Producto, Cantidad... -->
-</form>
+<div class="container mt-4">
+  <h2 class="mb-4 text-center"><i class="bi bi-cart-plus-fill"></i> Registrar Compra</h2>
+
+  <form id="form-compras">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label for="Fecha" class="form-label">📅 Fecha</label>
+        <input type="date" class="form-control" name="Fecha" required>
+      </div>
+      <div class="col-md-4">
+        <label for="N_Documento" class="form-label">📄 N° Documento</label>
+        <input type="text" class="form-control" name="N_Documento" required>
+      </div>
+      <div class="col-md-4">
+        <label for="Forma_Pago" class="form-label">💳 Forma de Pago</label>
+        <select class="form-select" name="Forma_Pago" required></select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="Proveedor" class="form-label">🏢 Proveedor</label>
+      <div class="input-group">
+        <select class="form-select" name="Proveedor" id="Proveedor" required></select>
+        <button class="btn btn-outline-success" type="button" onclick="abrirModalProveedor()">+</button>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="Producto" class="form-label">📦 Producto</label>
+      <div class="input-group">
+        <select class="form-select" name="Producto" id="Producto" required></select>
+        <button class="btn btn-outline-success" type="button" onclick="abrirModalProducto()">+</button>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label for="Cantidad" class="form-label">🔢 Cantidad</label>
+        <input type="number" step="any" class="form-control" name="Cantidad" required>
+      </div>
+      <div class="col-md-4">
+        <label for="PrecioUnitario" class="form-label">💰 Precio Unitario</label>
+        <input type="number" step="any" class="form-control" name="PrecioUnitario" required>
+      </div>
+      <div class="col-md-4">
+        <label for="Moneda" class="form-label">💱 Moneda</label>
+        <select class="form-select" name="Moneda" required>
+          <option value="₡">₡</option>
+          <option value="$">$</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="Tipo_Compra" class="form-label">📋 Tipo de Compra</label>
+      <select class="form-select" name="Tipo_Compra" id="Tipo_Compra" required></select>
+    </div>
+
+    <div class="mb-3">
+      <label for="Observaciones" class="form-label">📝 Observaciones</label>
+      <textarea class="form-control" name="Observaciones" rows="3"></textarea>
+    </div>
+
+    <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-success me-2"><i class="bi bi-check-circle-fill"></i> Guardar</button>
+      <a href="/" class="btn btn-danger"><i class="bi bi-x-circle-fill"></i> Cancelar</a>
+    </div>
+  </form>
+
+  <div id="mensaje-guardando" class="text-center mt-3 fw-bold" style="display:none;">
+    Guardando...
+  </div>
+</div>
+
+<script>
+async function cargarDatosFormulario() {
+  try {
+    const res = await fetch('/compras/datos_formulario');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const llenar = (selector, lista, campo = null) => {
+      const sel = document.querySelector(selector);
+      sel.innerHTML = '<option value="">Seleccione</option>';
+      lista.forEach(e => {
+        const val = campo ? e[campo] : e;
+        if (val) sel.innerHTML += `<option value="${val}">${val}</option>`;
+      });
+    };
+
+    llenar('select[name="Proveedor"]', data.proveedores, 'Nombre');
+    llenar('select[name="Producto"]', data.productos, 'Nombre');
+    llenar('select[name="Tipo_Compra"]', data.tipos_compra);
+    llenar('select[name="Forma_Pago"]', data.formas_pago);
+  } catch (err) {
+    alert("Error al cargar datos del formulario: " + err.message);
+  }
+}
+
+document.getElementById("form-compras").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  document.getElementById("mensaje-guardando").style.display = "block";
+
+  const formData = new FormData(this);
+  const datos = Object.fromEntries(formData.entries());
+
+  try {
+    const res = await fetch("/guardar_compra", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos),
+    });
+
+    const resultado = await res.json();
+    alert(resultado.mensaje || "Compra registrada correctamente.");
+    this.reset();
+    cargarDatosFormulario();
+  } catch (err) {
+    alert("Error al guardar la compra.");
+  } finally {
+    document.getElementById("mensaje-guardando").style.display = "none";
+  }
+});
+
+window.onload = cargarDatosFormulario;
+
+function abrirModalProveedor() {
+  alert("Modal proveedor no implementado en esta vista aún.");
+}
+
+function abrirModalProducto() {
+  alert("Modal producto no implementado en esta vista aún.");
+}
+</script>
 {% endblock %}
