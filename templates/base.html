@@ -25,10 +25,10 @@
       font-size: 1.25rem;
     }
     @media (max-width: 400px) {
-      .navbar-brand {
-        font-size: 1rem;
-      }
+      .navbar-brand { font-size: 1rem; }
     }
+
+    /* Sidebar desktop */
     .sidebar {
       height: 100vh;
       position: fixed;
@@ -36,7 +36,7 @@
       left: 0;
       width: 250px;
       background-color: #ADE8E6;
-      padding: 2rem 1rem 1rem 1rem;
+      padding: 2rem 1rem 1rem;
       overflow-y: auto;
       z-index: 1040;
     }
@@ -52,14 +52,19 @@
       margin-left: 250px;
       margin-bottom: 60px;
     }
+
+    /* Mobile: oculto sidebar, muestro toggler */
+    @media (max-width: 991.98px) {
+      .sidebar { display: none; }
+      .content { margin-left: 0; }
+    }
+
     .accordion-button {
       background-color: #fff !important;
       color: #000;
       border: 1px solid #ddd;
     }
-    .accordion-button:focus {
-      box-shadow: none;
-    }
+    .accordion-button:focus { box-shadow: none; }
     .accordion-button:not(.collapsed) {
       background-color: #e9ecef !important;
     }
@@ -67,9 +72,7 @@
       padding-left: 1.5rem;
       color: #000;
     }
-    .nav-link:hover {
-      background-color: #e0f7f5;
-    }
+    .nav-link:hover { background-color: #e0f7f5; }
     .nav-link.active {
       background-color: #d1f0ee;
       font-weight: bold;
@@ -92,18 +95,7 @@
       font-size: 0.9rem;
       text-decoration: none;
     }
-    .bottom-bar a:hover {
-      color: #ffd700;
-    }
-
-    @media (max-width: 991.98px) {
-      .sidebar {
-        display: none;
-      }
-      .content {
-        margin-left: 0;
-      }
-    }
+    .bottom-bar a:hover { color: #ffd700; }
   </style>
 </head>
 <body>
@@ -117,17 +109,17 @@
         {% endif %}
         <span>{{ nombre_negocio }}</span>
       </a>
+      <!-- Botón hamburguesa -->
       <button class="navbar-toggler" type="button"
-              onclick="document.getElementById('sidebarMenu').style.display='block'">
-        <span class="navbar-toggler-icon"></span>
+              onclick="let sb=document.getElementById('sidebarMenu'); sb.style.display = sb.style.display==='block' ? 'none' : 'block'">
+        <i class="bi bi-list fs-2"></i>
       </button>
     </div>
   </nav>
 
   <!-- Menú lateral -->
   <div class="sidebar" id="sidebarMenu">
-    <span class="close-btn"
-          onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
+    <span class="close-btn" onclick="document.getElementById('sidebarMenu').style.display='none'">❌</span>
     <div class="accordion mt-4" id="menuAccordion">
 
       <!-- Compras -->
