@@ -1,26 +1,12 @@
-import pandas as pd
-
-URL_CONFIGURACION = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8E3cr73eOHXX-unVuxlA0L3jydzA4hCMP1ZNFTJBhGAVmLo3OpulCjDyhxd7vby7JvBTXUMF66wIS/pub?gid=2133313737&single=true&output=csv"
+import requests
+import csv
+from io import StringIO
 
 def cargar_configuracion():
-    try:
-        df = pd.read_csv(URL_CONFIGURACION)
-        df = df.fillna('')  # Reemplazar NaN con cadena vacía
-        config = {fila['Clave']: fila['Valor'] for _, fila in df.iterrows()}
-        return {
-            'NombreNegocio': config.get('NombreNegocio', 'Mi Negocio'),
-            'CorreoNotificaciones': config.get('CorreoNotificaciones', ''),
-            'Moneda': config.get('Moneda', '₡'),
-            'ColorPrincipal': config.get('ColorPrincipal', '#0d6efd'),
-            'ColorFondo': config.get('ColorFondo', '#ffffff'),
-            'LogoURL': config.get('LogoURL', ''),
-            'URLScript': config.get('URLScript', ''),
-            'URLScriptProveedores': config.get('URLScriptProveedores', ''),
-            'URLScriptProductos': config.get('URLScriptProductos', ''),
-            'URLScriptConfig': config.get('URLScriptConfig', ''),
-            'URLProveedores': config.get('URLProveedores', ''),
-            'URLProductos': config.get('URLProductos', ''),
-        }
-    except Exception as e:
-        print("Error cargando configuración:", e)
-        return {}
+    """Lee la hoja Configuración desde Google Sheets y devuelve un diccionario."""
+    SHEET_URL = "TU_URL_CONFIG_CSV"
+    resp = requests.get(SHEET_URL)
+    resp.raise_for_status()
+    reader = csv.DictReader(StringIO(resp.text))
+    # Asume columnas: Clave, Valor
+    return { row['Clave']: row['Valor'] for row in reader }
