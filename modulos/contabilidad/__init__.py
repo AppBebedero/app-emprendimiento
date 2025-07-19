@@ -1,1 +1,1 @@
-from .accounting import Accounting
+from .contabilidad import Accounting
